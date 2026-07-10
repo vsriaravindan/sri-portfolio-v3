@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { NAV, CTA } from '@/lib/constants';
-import { Sun, Moon, Menu, X } from 'lucide-react';
+import { Sun, Moon, Menu, X, Search } from 'lucide-react';
 
 export default function Header() {
   const pathname = usePathname();
@@ -56,6 +56,16 @@ export default function Header() {
           ))}
           <div className="ml-3 flex items-center gap-2">
             <button
+              onClick={() => window.dispatchEvent(new CustomEvent('toggle-cmd-palette'))}
+              className="nav-icon-btn relative group"
+              aria-label="Search (Ctrl+K)"
+            >
+              <Search size={13} />
+              <span className="pointer-events-none absolute -bottom-[18px] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[0.5rem] tracking-[0.05em] text-[var(--text-muted)] opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                {typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl+K'}
+              </span>
+            </button>
+            <button
               onClick={toggle}
               className="nav-icon-btn"
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -97,6 +107,19 @@ export default function Header() {
               </Link>
             ))}
             <div className="mt-3 flex items-center gap-3">
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('toggle-cmd-palette'));
+                  setMobileOpen(false);
+                }}
+                className="flex items-center gap-1.5 nav-icon-btn px-1.5"
+                aria-label="Open search (Ctrl+K)"
+              >
+                <Search size={13} />
+                <kbd className="font-mono text-[0.5rem] tracking-[0.05em] text-[var(--text-muted)] leading-none">
+                  ⌘K
+                </kbd>
+              </button>
               <button
                 onClick={toggle}
                 className="nav-icon-btn"

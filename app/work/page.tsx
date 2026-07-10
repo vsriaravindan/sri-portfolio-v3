@@ -1,7 +1,32 @@
 import WorkRow from '@/components/WorkRow';
-import { workExperience } from '@/lib/work';
+import { supabase } from '@/lib/supabase';
+import type { WorkExperience } from '@/lib/work';
 
-export default function WorkPage() {
+const fallbackWork: WorkExperience[] = [
+  {
+    period: "2023 — Present",
+    role: "DevOps Engineer",
+    organization: "Current Role",
+    description:
+      "Designing scalable, highly available systems on AWS. Automating infrastructure provisioning with Terraform and CloudFormation. Building CI/CD pipelines with Jenkins and GitHub Actions. Managing containerized workloads on Docker and Kubernetes (EKS).",
+  },
+];
+
+const fallbackExploring = [
+  { title: "Kubernetes (EKS)", desc: "Deep-diving into production-grade Kubernetes on AWS EKS — cluster autoscaling, IRSA, and GitOps workflows." },
+  { title: "Advanced Terraform", desc: "Building reusable module registries, managing state at scale with remote backends, and policy-as-code with Sentinel." },
+  { title: "Web3 Infrastructure", desc: "Exploring decentralized infrastructure, blockchain node operations, and applying DevOps principles to Web3." },
+];
+
+export default async function WorkPage() {
+  const { data: workData } = await supabase
+    .from('site_content')
+    .select('content')
+    .eq('section', 'work')
+    .maybeSingle();
+
+  const entries: WorkExperience[] = workData?.content?.entries ?? fallbackWork;
+
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
       <p className="mono-label">Experience</p>
@@ -10,7 +35,7 @@ export default function WorkPage() {
       </h1>
 
       <div className="mt-12 sm:mt-16">
-        {workExperience.map((work, i) => (
+        {entries.map((work, i) => (
           <WorkRow key={i} work={work} index={i} />
         ))}
       </div>
@@ -43,11 +68,7 @@ export default function WorkPage() {
       <div className="mt-16">
         <p className="mono-label">Currently Exploring</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {[
-            { title: "Kubernetes (EKS)", desc: "Deep-diving into production-grade Kubernetes on AWS EKS — cluster autoscaling, IRSA, and GitOps workflows." },
-            { title: "Advanced Terraform", desc: "Building reusable module registries, managing state at scale with remote backends, and policy-as-code with Sentinel." },
-            { title: "Web3 Infrastructure", desc: "Exploring decentralized infrastructure, blockchain node operations, and applying DevOps principles to Web3." },
-          ].map((item) => (
+          {fallbackExploring.map((item) => (
             <div key={item.title} className="card-line p-5">
               <h3 className="font-mono text-sm font-medium">{item.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">

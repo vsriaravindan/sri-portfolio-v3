@@ -1,10 +1,20 @@
 import Link from 'next/link';
-import { projects } from '@/lib/projects';
+import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, CodeXml, Check } from 'lucide-react';
+import type { Project } from '@/lib/projects';
 
-export default function LedgerCalcPage() {
-  const project = projects.find((p) => p.slug === 'ledgercalc');
+export default async function LedgerCalcPage() {
+  const { data } = await supabase
+    .from('site_content')
+    .select('content')
+    .eq('section', 'projects')
+    .maybeSingle();
+
+  const project: Project | undefined = (data?.content?.projects ?? []).find(
+    (p: Project) => p.slug === 'ledgercalc'
+  );
+
   if (!project) notFound();
 
   return (
@@ -52,7 +62,7 @@ export default function LedgerCalcPage() {
           Key Highlights
         </h2>
         <ul className="mt-4 space-y-3">
-          {project.highlights.map((h, i) => (
+          {project.highlights.map((h: string, i: number) => (
             <li key={i} className="flex items-start gap-3 text-sm">
               <Check size={16} className="mt-0.5 shrink-0 text-[var(--accent)]" />
               <span className="text-[var(--text-secondary)]">{h}</span>
@@ -66,7 +76,7 @@ export default function LedgerCalcPage() {
           Tech Stack
         </h2>
         <div className="mt-3 flex flex-wrap gap-2">
-          {project.techStack.map((tech) => (
+          {project.techStack.map((tech: string) => (
             <span key={tech} className="pill text-[0.6rem]">
               {tech}
             </span>
@@ -74,7 +84,6 @@ export default function LedgerCalcPage() {
         </div>
       </div>
 
-      {/* Project cover with dots + glow */}
       <div className="relative mt-16 overflow-hidden rounded-sm border border-[var(--border-subtle)]">
         <div className="project-cover__dots absolute inset-0" />
         <div className="project-cover__glow absolute inset-0" />

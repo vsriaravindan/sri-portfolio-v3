@@ -1,7 +1,8 @@
 import { SOCIAL } from '@/lib/constants';
+import { supabase } from '@/lib/supabase';
 import { ArrowUpRight, BookOpen } from 'lucide-react';
 
-const articles = [
+const fallbackArticles = [
   {
     title: "Automating AWS Infrastructure with Terraform",
     description: "A step-by-step guide on provisioning VPCs, EC2 instances, and RDS databases using Terraform modules and remote state management.",
@@ -22,7 +23,15 @@ const articles = [
   },
 ];
 
-export default function WritingPage() {
+export default async function WritingPage() {
+  const { data: articlesData } = await supabase
+    .from('site_content')
+    .select('content')
+    .eq('section', 'articles')
+    .maybeSingle();
+
+  const articles = articlesData?.content?.articles ?? fallbackArticles;
+
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
       <p className="mono-label">Writing</p>
@@ -36,7 +45,7 @@ export default function WritingPage() {
       </p>
 
       <div className="mt-12 space-y-1">
-        {articles.map((article, i) => (
+        {articles.map((article: typeof fallbackArticles[0], i: number) => (
           <a
             key={i}
             href={article.url}

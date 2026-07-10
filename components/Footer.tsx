@@ -63,25 +63,6 @@ export default function Footer() {
 
         <div className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t border-[color-mix(in_srgb,var(--paper)_16%,transparent)] pt-5 sm:mt-24">
           <span className="flex items-center gap-3">
-            <svg
-              viewBox="-29.5 -77 485.5 206.5"
-              className="h-3.5 w-auto text-[var(--paper)]"
-              aria-hidden="true"
-            >
-              <g fill="none" stroke="currentColor" strokeWidth="22">
-                <path d="M80.1 22.9 A40.5 40.5 0 1 0 80.1 77.1" />
-                <path d="M135 100 V30.5 A19.5 19.5 0 0 1 174 30.5 V100 M174 30.5 A19.5 19.5 0 0 1 213 30.5 V100" />
-                <path d="M256 50 A40.5 40.5 0 1 0 337 50 A40.5 40.5 0 1 0 256 50" />
-                <path d="M337 -38 V100" />
-              </g>
-              <rect
-                x="378"
-                y="-30"
-                width="50"
-                height="130"
-                fill="var(--accent)"
-              />
-            </svg>
             <p className="mono-meta">
               &copy; {new Date().getFullYear()} Sri Aravindan
             </p>

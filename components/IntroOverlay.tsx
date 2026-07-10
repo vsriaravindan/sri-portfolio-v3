@@ -24,7 +24,7 @@ export default function IntroOverlay() {
     const timer = setTimeout(() => {
       document.documentElement.dataset.intro = '';
       setVisible(false);
-    }, 4000);
+    }, 15000);
 
     return () => clearTimeout(timer);
   }, []);

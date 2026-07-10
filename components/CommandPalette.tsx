@@ -55,8 +55,13 @@ export default function CommandPalette() {
       }
       if (e.key === 'Escape') setOpen(false);
     };
+    const toggleHandler = () => setOpen((p) => !p);
     document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    window.addEventListener('toggle-cmd-palette', toggleHandler);
+    return () => {
+      document.removeEventListener('keydown', handler);
+      window.removeEventListener('toggle-cmd-palette', toggleHandler);
+    };
   }, []);
 
   useEffect(() => {

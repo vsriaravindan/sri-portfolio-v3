@@ -5,13 +5,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { NAV, CTA } from '@/lib/constants';
-import { Sun, Moon, Menu, X, Search } from 'lucide-react';
+import { api } from '@/lib/supabase-browser';
+import { Sun, Moon, Menu, X, Search, LogIn, LayoutDashboard } from 'lucide-react';
 
 export default function Header() {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -23,8 +25,30 @@ export default function Header() {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    api.getUser().then((u: any) => setUser(u));
+  }, [pathname]);
+
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  const authLinks = user ? (
+    <Link
+      href="/dashboard"
+      className={`nav-link flex items-center gap-1.5 ${isActive('/dashboard') ? 'active' : ''}`}
+    >
+      <LayoutDashboard size={11} />
+      Dashboard
+    </Link>
+  ) : (
+    <Link
+      href="/dashboard"
+      className={`nav-link flex items-center gap-1.5 ${isActive('/dashboard') ? 'active' : ''}`}
+    >
+      <LogIn size={11} />
+      Sign In
+    </Link>
+  );
 
   return (
     <nav className="site-nav" data-scrolled={scrolled}>
@@ -54,6 +78,7 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
+          {authLinks}
           <div className="ml-3 flex items-center gap-2">
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('toggle-cmd-palette'))}
@@ -106,6 +131,7 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            {authLinks}
             <div className="mt-3 flex items-center gap-3">
               <button
                 onClick={() => {

@@ -99,11 +99,47 @@ Blog posts use the Novel rich text editor (TipTap-based). Content stored as JSON
 | `/blog/[slug]` | All visitors | Blog reader view |
 | `/auth/callback` | All visitors | Email confirmation success/failure page |
 
-## Known Issues
-- No edit post page yet (only new posts). Users must delete and recreate.
-- No blog management links inside `/dashboard/posts` — need to create dedicated route.
+## Known Issues (Resolved)
+- ~~No edit post page yet (only new posts). Users must delete and recreate.~~ ✅ Added at `/blog/[slug]/edit`
+- ~~No blog management links inside `/dashboard/posts`~~ ✅ Edit button in dashboard post list
 - Novel editor missing some slash command items (blockquote, image upload).
-- `lib/cms.ts` is unused (dashboard content page has inline forms).
+- ~~`lib/cms.ts` is unused (dashboard content page has inline forms).~~
+
+## New Features (v3.1)
+### GitHub OAuth Sign-In
+- "Sign in with GitHub" button on the sign-in/signup form
+- Auto-fetches display name and avatar from GitHub profile
+- Profile created automatically via DB trigger on signup
+
+### Profile Management
+- `/dashboard/profile` — Edit display name, avatar (upload), GitHub URL, bio, blog handle
+- Avatar stored in Supabase Storage (`avatars` bucket)
+- Author profile card shown on blog reader page
+
+### Blog Enhancements
+- **Edit posts** — `/blog/[slug]/edit` — loads existing Novel content, saves via PATCH
+- **Cover images** — Upload/remove cover images on new and edit post pages
+- **Author profiles** — Avatar + name + bio displayed on blog reader
+- **Home page** — Latest 3 published posts section after Featured Projects
+
+### Bug Fixes
+- **Post creation** — Fixed `author_id` missing from insert (RLS was silently blocking)
+- **Blog reader** — Converted to server component with anon-key query (was using auth-bound REST API)
+- **Input visibility** — Added `site-input` CSS class with visible background + border in dark mode
+- **Broken env var** — Fixed truncated `NEXT_PUBLIC_SUPABASE_ANON_KEY` in dashboard delete handler
+- **Dashboard posts** — Now scoped to current user's posts only
+
+### Header
+- Auth-aware nav — shows "Dashboard" when signed in, "Sign In" when not
+- Dashboard button with icon in both desktop and mobile nav
+
+## Setup for GitHub OAuth
+1. Run `seed-v2.sql` in Supabase Dashboard → SQL Editor
+2. Go to GitHub → Settings → Developer Settings → OAuth Apps → New OAuth App
+   - Homepage URL: `https://sri-portfolio-v3.vercel.app`
+   - Callback URL: `https://iuhbtmfdvfuurtkszvar.supabase.co/auth/v1/callback`
+3. Copy Client ID and generate a Client Secret
+4. In Supabase Dashboard → Authentication → Providers → GitHub → Enable and paste credentials
 
 ## Environment Variables (Vercel)
 ```

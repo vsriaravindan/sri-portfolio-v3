@@ -64,10 +64,14 @@ const fallbackProjects: Project[] = [
 
 export default async function Home() {
   // ── Fetch from Supabase ──────────────────────────────────────────────
-  const [aboutRes, skillsRes, projectsRes] = await Promise.all([
+  const [aboutRes, skillsRes, projectsRes, latestPostsRes] = await Promise.all([
     supabase.from('site_content').select('content').eq('section', 'about').maybeSingle(),
     supabase.from('site_content').select('content').eq('section', 'skills').maybeSingle(),
     supabase.from('site_content').select('content').eq('section', 'projects').maybeSingle(),
+    supabase.from('posts').select('id, title, slug, excerpt, tags, read_time, created_at, cover_url')
+      .eq('published', true)
+      .order('created_at', { ascending: false })
+      .limit(3),
   ]);
 
   const about = aboutRes?.data?.content ?? fallbackAbout;
@@ -75,6 +79,7 @@ export default async function Home() {
   const projects = projectsRes?.data?.content ?? { projects: fallbackProjects };
   const featured = projects.projects.filter((p: Project) => p.featured);
   const skillCategories = skills.categories ?? fallbackSkills;
+  const latestPosts = latestPostsRes?.data ?? [];
 
   return (
     <>
@@ -138,6 +143,58 @@ export default async function Home() {
               style={{ color: 'var(--accent)' }}
             >
               View all work &rarr;
+            </Link>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* Latest Blog Posts */}
+      <ScrollReveal delay={250}>
+        <section className="mx-auto max-w-6xl px-6 pb-24 sm:px-10 sm:pb-28">
+          <p className="mono-label" style={{ color: 'var(--accent)' }}>Latest from the Blog</p>
+
+          <div className="mt-8 space-y-1">
+            {latestPosts.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[var(--text-muted)]">No posts yet. Stay tuned.</p>
+            ) : (
+              latestPosts.map((post: any) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="card-line card-line-interactive flex items-start gap-4 p-5 no-underline sm:p-6"
+                >
+                  {post.cover_url && (
+                    <div className="mt-0.5 h-14 w-14 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-16">
+                      <img src={post.cover_url} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-medium">{post.title}</h3>
+                    {post.excerpt && (
+                      <p className="mt-1 text-sm text-[var(--text-secondary)] line-clamp-2">{post.excerpt}</p>
+                    )}
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-[0.65rem] text-[var(--text-muted)]">
+                      <span>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      {post.read_time && <span>{post.read_time} min read</span>}
+                      <div className="flex flex-wrap gap-1.5">
+                        {(post.tags ?? []).map((tag: string) => (
+                          <span key={tag} className="mono-label text-[0.5rem]" style={{ color: 'var(--accent)' }}>#{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <Link
+              href="/blog"
+              className="font-mono text-xs hover:underline"
+              style={{ color: 'var(--accent)' }}
+            >
+              View all posts &rarr;
             </Link>
           </div>
         </section>

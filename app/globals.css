@@ -565,6 +565,24 @@ body {
   border-color: var(--border-subtle);
 }
 
+/* ── Form Inputs (visible against dark bg) ── */
+.site-input {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  border-radius: 2px;
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              box-shadow var(--dur-fast) var(--ease-standard);
+}
+.site-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  outline: none;
+}
+.site-input::placeholder {
+  color: var(--text-muted);
+}
+
 .project-cover__dots {
   opacity: 0.42;
   background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text-muted) 22%, transparent) 1px, transparent 0);

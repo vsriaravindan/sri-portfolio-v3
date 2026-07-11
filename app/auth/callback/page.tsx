@@ -1,24 +1,37 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/supabase-browser';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 
 export default function AuthCallbackPage() {
+  const router = useRouter();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    const params = new URLSearchParams(hash);
-    const error = params.get('error') || new URLSearchParams(window.location.search).get('error');
-
-    if (error) {
+    // Handle both email confirmation (#access_token) and OAuth (#access_token=...)
+    const result = api.handleAuthCallback();
+    if (result.error) {
       setStatus('error');
-    } else {
-      // Token is in the URL fragment — Supabase handled it
+    } else if (result.access_token) {
       setStatus('success');
+      // Redirect to dashboard after brief delay
+      const t = setTimeout(() => router.push('/dashboard'), 1500);
+      return () => clearTimeout(t);
+    } else {
+      // Check if there's an error in the URL query params
+      const searchParams = new URLSearchParams(window.location.search);
+      const err = searchParams.get('error') || searchParams.get('error_description');
+      if (err) {
+        setStatus('error');
+      } else {
+        // No token found — user probably landed here directly
+        setStatus('error');
+      }
     }
-  }, []);
+  }, [router]);
 
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-28 text-center sm:px-10 sm:pt-36">
@@ -26,7 +39,7 @@ export default function AuthCallbackPage() {
         <div>
           <Loader2 size={32} className="mx-auto animate-spin" style={{ color: 'var(--accent)' }} />
           <h1 className="display-head mt-8 text-[length:var(--type-display-md)]">
-            Verifying your email...
+            Verifying...
           </h1>
         </div>
       )}
@@ -35,14 +48,11 @@ export default function AuthCallbackPage() {
         <div>
           <CheckCircle size={48} className="mx-auto" style={{ color: 'var(--accent)' }} />
           <h1 className="display-head mt-6 text-[length:var(--type-display-md)]">
-            Email <em>Verified</em>
+            <em>Authenticated</em>
           </h1>
           <p className="mt-4 text-sm text-[var(--text-secondary)]">
-            Your email has been confirmed successfully. You can now sign in.
+            Redirecting to dashboard...
           </p>
-          <Link href="/dashboard" className="btn btn-solid mt-8">
-            Go to Dashboard
-          </Link>
         </div>
       )}
 

@@ -15,9 +15,16 @@ export default function DashboardPage() {
   const isAdmin = userEmail === 'vsriaravindan@gmail.com';
 
   useEffect(() => {
-    api.getUser().then((u: any) => setUserEmail(u?.email ?? null));
-    api.from('posts').then((tb: any) => tb.select('*')).then(({ data }: any) => {
-      setPosts(data ?? []);
+    api.getUser().then(async (u: any) => {
+      setUserEmail(u?.email ?? null);
+      if (u?.id) {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?author_id=eq.${u.id}&order=created_at.desc`,
+          { headers: api._headers() }
+        );
+        const data = await res.json();
+        setPosts(data ?? []);
+      }
       setLoading(false);
     });
   }, []);
@@ -70,6 +77,13 @@ export default function DashboardPage() {
             </div>
           </Link>
         )}
+        <Link href="/dashboard/profile" className="card-line card-line-interactive flex items-center gap-3 p-4">
+          <Settings size={18} className="text-[var(--accent)]" />
+          <div>
+            <p className="text-sm font-medium">Profile</p>
+            <p className="text-[0.65rem] text-[var(--text-muted)]">Avatar, name, GitHub link, bio</p>
+          </div>
+        </Link>
         <Link href="/blog" className="card-line card-line-interactive flex items-center gap-3 p-4">
           <ExternalLink size={18} className="text-[var(--accent)]" />
           <div>
@@ -96,8 +110,7 @@ export default function DashboardPage() {
               value={newPw}
               onChange={(e) => setNewPw(e.target.value)}
               placeholder="New password (optional — set in email)"
-              className="flex-1 rounded-sm border bg-transparent px-3 py-2 text-sm"
-              style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+              className="site-input flex-1 px-3 py-2 text-sm"
             />
             <button onClick={handlePasswordChange} className="btn btn-solid text-[0.65rem]">
               Send Reset Link
@@ -139,6 +152,13 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Link
+                    href={`/blog/${post.slug}/edit`}
+                    className="nav-icon-btn"
+                    aria-label="Edit"
+                  >
+                    <Edit size={12} />
+                  </Link>
                   <Link
                     href={`/blog/${post.slug}`}
                     className="nav-icon-btn"

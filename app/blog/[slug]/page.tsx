@@ -1,47 +1,36 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
-import { api } from '@/lib/supabase-browser';
-import { EditorContent, EditorRoot, JSONContent } from 'novel';
-import { ArrowLeft, Calendar, Clock, Loader2 } from 'lucide-react';
-import type { Post } from '@/lib/posts';
-import StarterKit from '@tiptap/starter-kit';
+import { notFound } from 'next/navigation';
+import { Calendar, Clock, ArrowLeft, User } from 'lucide-react';
+import BlogPostReader from './BlogPostReader';
 
-const extensions = [StarterKit];
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-export default function BlogPostPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const [post, setPost] = useState<Post | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!slug) return;
-    api.from('posts').then((tb: any) => tb.select('*')).then(({ data, error }: any) => {
-      // The REST API returns an array; find by slug client-side
-      const post = (data ?? []).find((p: any) => p.slug === slug);
-      if (post) setPost(post as Post);
-      setLoading(false);
-    });
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--bg-base)' }}>
-        <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
-      </div>
-    );
-  }
+  const { data: post } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('published', true)
+    .single();
 
   if (!post) {
-    return (
-      <div className="mx-auto max-w-4xl px-6 pb-24 pt-28 text-center sm:px-10 sm:pt-36">
-        <h1 className="display-head text-[length:var(--type-display-lg)]">Not Found</h1>
-        <p className="mt-4 text-sm text-[var(--text-secondary)]">This post doesn&apos;t exist.</p>
-        <Link href="/blog" className="btn btn-ghost mt-8">Back to Blog</Link>
-      </div>
-    );
+    notFound();
+  }
+
+  // Fetch author profile
+  let author = null;
+  if (post.author_id) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name, avatar_url, github_url, bio')
+      .eq('id', post.author_id)
+      .maybeSingle();
+    author = profile;
   }
 
   return (
@@ -71,22 +60,44 @@ export default function BlogPostPage() {
         </div>
         {post.tags && post.tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
-            {(post.tags ?? []).map((tag) => (
+            {(post.tags ?? []).map((tag: string) => (
               <span key={tag} className="pill text-[0.55rem]">#{tag}</span>
             ))}
           </div>
         )}
       </header>
 
+      {/* Author profile card */}
+      {author && (
+        <div
+          className="mt-8 flex items-center gap-4 rounded-sm border p-4"
+          style={{ borderColor: 'var(--border-subtle)' }}
+        >
+          {author.avatar_url ? (
+            <img
+              src={author.avatar_url}
+              alt={author.display_name || ''}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-full"
+              style={{ background: 'var(--bg-surface)' }}
+            >
+              <User size={16} className="text-[var(--text-muted)]" />
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-medium">{author.display_name || 'Author'}</p>
+            {author.bio && (
+              <p className="text-[0.65rem] text-[var(--text-muted)]">{author.bio}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="prose-custom mt-10">
-        <EditorRoot>
-          <EditorContent
-            initialContent={post.content as JSONContent}
-            editable={false}
-            extensions={extensions}
-            className="novel-reader"
-          />
-        </EditorRoot>
+        <BlogPostReader content={post.content} />
       </div>
     </article>
   );

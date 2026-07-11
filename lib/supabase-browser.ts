@@ -2,6 +2,8 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const authHeaders = { 'Content-Type': 'application/json', apikey: key };
 
+const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
 // Pure REST — no GoTrueClient, no storage bug
 export const api = {
   // ── Auth ──
@@ -25,6 +27,33 @@ export const api = {
     if (!res.ok) throw new Error(data.msg || data.error_description || 'Login failed');
     setToken(data.access_token, data.refresh_token ?? '');
     return data;
+  },
+
+  /** Redirect the user to GitHub OAuth. Callback lands on /auth/callback */
+  signInWithGithub() {
+    const redirectTo = `${baseUrl}/auth/callback`;
+    window.location.href = `${url}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`;
+  },
+
+  /** Handle OAuth callback — parse tokens from URL fragment */
+  handleAuthCallback(): { access_token?: string; refresh_token?: string; error?: string } {
+    if (typeof window === 'undefined') return {};
+    const hash = window.location.hash.replace('#', '');
+    const params = new URLSearchParams(hash);
+    const searchParams = new URLSearchParams(window.location.search);
+
+    const error = params.get('error') || searchParams.get('error') || searchParams.get('error_description');
+    if (error) return { error };
+
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    if (accessToken) {
+      setToken(accessToken, refreshToken ?? '');
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      return { access_token: accessToken, refresh_token: refreshToken ?? '' };
+    }
+    return {};
   },
 
   async signOut() {
@@ -108,10 +137,74 @@ export const api = {
         if (!res.ok) throw new Error(data.message || `INSERT ${table} failed`);
         return { data, error: null };
       },
+      async update(body: any, column: string, value: any) {
+        const res = await fetch(`${url}/rest/v1/${table}?${column}=eq.${value}`, {
+          method: 'PATCH',
+          headers: { ...self._headers(), Prefer: 'return=representation' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `UPDATE ${table} failed`);
+        return { data, error: null };
+      },
       eq(col: string, val: any) {
         return this; // would need full query builder — use raw fetch for now
       },
     };
+  },
+
+  // ── Profile ──
+  async getProfile(userId: string) {
+    const res = await fetch(`${url}/rest/v1/profiles?id=eq.${userId}&select=*`, {
+      headers: this._headers(),
+    });
+    const data = await res.json();
+    return (data ?? [])[0] || null;
+  },
+
+  async upsertProfile(profile: Record<string, any>) {
+    const res = await fetch(`${url}/rest/v1/profiles`, {
+      method: 'POST',
+      headers: { ...this._headers(), Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify([profile]),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Profile save failed');
+    return (data ?? [])[0];
+  },
+
+  // ── Storage ──
+  /** Upload a file to a public bucket. Returns the public URL. */
+  async uploadFile(bucket: string, path: string, file: File): Promise<string> {
+    const token = getToken();
+    const res = await fetch(`${url}/storage/v1/object/${bucket}/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${token}`,
+        'x-upsert': 'true',
+        // Don't set Content-Type — fetch auto-sets it with the boundary for binary
+      },
+      body: file,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Upload failed: ${res.status}`);
+    }
+    return `${url}/storage/v1/object/public/${bucket}/${path}`;
+  },
+
+  /** Delete a file from a bucket */
+  async deleteFile(bucket: string, path: string) {
+    const token = getToken();
+    const res = await fetch(`${url}/storage/v1/object/${bucket}/${path}`, {
+      method: 'DELETE',
+      headers: { apikey: key, Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Delete failed: ${res.status}`);
+    }
   },
 
   _headers() {

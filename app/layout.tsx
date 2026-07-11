@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import CommandPalette from "@/components/CommandPalette";
 import IntroOverlay from "@/components/IntroOverlay";
 import PageTransition from "@/components/PageTransition";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function RootLayout({
           </PageTransition>
           <Footer />
           <CommandPalette />
+          <ScrollToTop />
           <IntroOverlay />
         </ThemeProvider>
       </body>

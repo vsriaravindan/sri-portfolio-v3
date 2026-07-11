@@ -22,15 +22,18 @@ sri-portfolio/
 │   ├── projects/[slug]/page.tsx    # Project detail pages (from Supabase)
 │   ├── blog/
 │   │   ├── page.tsx                # Blog post list (server component, reads published posts)
-│   │   ├── [slug]/page.tsx         # Blog reader (client component, renders Novel JSON)
-│   │   └── new/page.tsx            # Novel editor for writing posts
+│   │   ├── [slug]/page.tsx         # Blog reader (server component, renders Novel JSON + author profile)
+│   │   ├── [slug]/BlogPostReader.tsx # Client wrapper for Novel EditorContent (read-only)
+│   │   ├── [slug]/edit/page.tsx    # Edit post page — loads existing Novel content + cover image
+│   │   └── new/page.tsx            # Novel editor for writing posts (with cover image upload)
 │   ├── dashboard/
-│   │   ├── layout.tsx              # Dashboard auth guard + header
-│   │   ├── page.tsx                # Dashboard landing (post list, quick links, change password)
-│   │   └── content/page.tsx        # Site config editor (admin only: vsriaravindan@gmail.com)
+│   │   ├── layout.tsx              # Dashboard auth guard (email + GitHub OAuth), sign-in/signup form
+│   │   ├── page.tsx                # Dashboard landing (post list, edit/delete, quick links, change password)
+│   │   ├── content/page.tsx        # Site config editor (admin only: vsriaravindan@gmail.com)
+│   │   └── profile/page.tsx        # Profile management — avatar upload, display name, GitHub, bio, handle
 │   └── auth/callback/page.tsx      # Email confirmation success/failure page
 ├── components/
-│   ├── Header.tsx                  # Sticky nav, theme toggle, search (⌘K), Blog tab
+│   ├── Header.tsx                  # Sticky nav with auth-aware links (Dashboard/SignIn), theme toggle, search (⌘K), Blog tab
 │   ├── Footer.tsx                  # Footer with social links + CTA
 │   ├── HeroSection.tsx             # Mouse parallax hero
 │   ├── CommandPalette.tsx          # CMD+K search overlay
@@ -47,6 +50,7 @@ sri-portfolio/
 │   └── work.ts                     # Work experience type + data (now overridden by Supabase)
 ├── .env.local                      # (gitignored) Supabase URL + anon key
 ├── seed.sql                        # Initial data SQL for site_content table
+├── seed-v2.sql                     # v3.1 migration: profiles table, storage buckets, indexes, triggers
 └── .hermes/sri-v3-cms-plan.md      # Original build plan
 ```
 
@@ -58,16 +62,23 @@ sri-portfolio/
 
 ### Tables
 1. **site_content** — One row per editable section (site_config, about, skills, projects, work, articles, contact, footer). Content stored as JSONB.
-2. **posts** — Blog posts with Novel JSON content.
+2. **posts** — Blog posts with Novel JSON content, cover image, author_id FK.
+3. **profiles** — User profiles linked to auth.users. Avatar, display name, GitHub, bio, blog handle.
 
 ### RLS Policies
 - `site_content`: Anyone can SELECT. Only `vsriaravindan@gmail.com` can UPDATE/INSERT.
 - `posts`: Anyone can read published. Authenticated users can CRUD their own.
+- `profiles`: Anyone can SELECT. Users can UPDATE/INSERT their own row.
 
 ### Auth
 - Email/password authentication with email confirmation
+- **GitHub OAuth** — Sign in with GitHub button on dashboard, auto-populates profile
 - Custom SMTP: elalastair@gmail.com (Gmail app password)
 - Redirect URLs pointing to Vercel
+
+### Storage Buckets
+- `avatars` (public) — Profile pictures uploaded from `/dashboard/profile`
+- `covers` (public) — Blog post cover images uploaded from `/blog/new` and `/blog/[slug]/edit`
 
 ### SMTP Setup
 - Host: smtp.gmail.com, Port: 465
@@ -93,11 +104,13 @@ Blog posts use the Novel rich text editor (TipTap-based). Content stored as JSON
 ## Dashboard Features
 | Route | Access | Description |
 |---|---|---|
-| `/dashboard` | All logged-in users | Post list, quick links (New Post, View Blog, Change Password) |
+| `/dashboard` | All logged-in users | Post list, edit/delete, quick links (New Post, View Blog, Profile, Change Password) |
 | `/dashboard/content` | Admin only (`vsriaravindan@gmail.com`) | Edit site config, about, skills, projects, work, articles, contact, footer |
-| `/blog/new` | All logged-in users | Novel editor to write and publish posts |
-| `/blog/[slug]` | All visitors | Blog reader view |
-| `/auth/callback` | All visitors | Email confirmation success/failure page |
+| `/dashboard/profile` | All logged-in users | Avatar upload, display name, GitHub URL, bio, blog handle |
+| `/blog/new` | All logged-in users | Novel editor to write and publish posts (with cover image upload) |
+| `/blog/[slug]` | All visitors | Blog reader view with author profile card |
+| `/blog/[slug]/edit` | Post author only | Edit existing post content, cover image, title, tags |
+| `/auth/callback` | All visitors | Email confirmation / GitHub OAuth callback handler |
 
 ## Known Issues (Resolved)
 - ~~No edit post page yet (only new posts). Users must delete and recreate.~~ ✅ Added at `/blog/[slug]/edit`

@@ -19,8 +19,23 @@ export default function DashboardLayout({
   const [mode, setMode] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
-    api.getUser().then((user) => {
-      setUser(user as any);
+    api.getUser().then(async (u: any) => {
+      setUser(u as any);
+      // Auto-populate profile from GitHub metadata if missing
+      if (u?.id && u?.user_metadata?.avatar_url) {
+        try {
+          const p = await api.getProfile(u.id);
+          if (!p?.avatar_url) {
+            await api.upsertProfile({
+              id: u.id,
+              avatar_url: u.user_metadata.avatar_url,
+              display_name: u.user_metadata.full_name || u.user_metadata.name || null,
+              github_url: u.user_metadata.user_name ? `https://github.com/${u.user_metadata.user_name}` : null,
+              github_username: u.user_metadata.user_name || null,
+            });
+          }
+        } catch {}
+      }
       setLoading(false);
     });
   }, []);

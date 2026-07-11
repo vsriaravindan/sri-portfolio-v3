@@ -551,23 +551,36 @@ body {
   color: var(--accent);
 }
 
-/* Hero glitch hover effect */
+/* ── Hero name — one-shot reveal + hover glow ── */
 .hero-char {
   display: inline-block;
-  transition: text-shadow var(--dur-fast) var(--ease-standard),
-              transform var(--dur-fast) var(--ease-standard),
-              color var(--dur-fast) var(--ease-standard);
   cursor: default;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Static subtle glow after reveal */
+.hero-char-revealed {
+  text-shadow: 0 0 4px var(--accent-muted);
 }
 
 .hero-char:hover {
   color: var(--accent);
-  text-shadow: 0 0 10px var(--accent),
-               0 0 20px var(--accent),
-               0 0 40px var(--accent-muted),
-               2px 2px 0 var(--accent-muted),
-               -1px -1px 0 rgba(0,255,65,0.3);
+  text-shadow:
+    0 0 10px var(--accent),
+    0 0 20px var(--accent),
+    0 0 40px var(--accent-muted),
+    2px 2px 0 var(--accent-muted),
+    -1px -1px 0 rgba(0,255,65,0.3);
   transform: translateY(-2px);
+}
+
+@keyframes hero-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .divider {

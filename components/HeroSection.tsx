@@ -1,69 +1,33 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { CTA, SITE } from '@/lib/constants';
 
 export default function HeroSection() {
   const [glowVisible, setGlowVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLHeadingElement>(null);
-  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     setGlowVisible(true);
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!sectionRef.current || !nameRef.current) return;
-
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-    rafRef.current = requestAnimationFrame(() => {
-      const rect = sectionRef.current!.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = (e.clientX - cx) / rect.width;
-      const dy = (e.clientY - cy) / rect.height;
-
-      const letters = nameRef.current!.querySelectorAll('.hero-char');
-      letters.forEach((char, i) => {
-        const speed = 8 + (i % 5) * 2;
-        const x = dx * speed;
-        const y = dy * speed;
-        const rotate = (dx * dy) * 3;
-        (char as HTMLElement).style.transform =
-          `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
-      });
-    });
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (!nameRef.current) return;
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-    const letters = nameRef.current.querySelectorAll('.hero-char');
-    letters.forEach((char) => {
-      (char as HTMLElement).style.transform = 'translate(0, 0) rotate(0deg)';
-    });
-  }, []);
-
+  // Add subtle static glow after reveal animation finishes
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const name = nameRef.current;
+    if (!name) return;
+    const timer = setTimeout(() => {
+      const chars = name.querySelectorAll<HTMLSpanElement>('.hero-char');
+      chars.forEach((c) => c.classList.add('hero-char-revealed'));
+    }, 1200); // after all letters have animated in
+    return () => clearTimeout(timer);
+  }, []);
 
-    section.addEventListener('mousemove', handleMouseMove);
-    section.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      section.removeEventListener('mousemove', handleMouseMove);
-      section.removeEventListener('mouseleave', handleMouseLeave);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [handleMouseMove, handleMouseLeave]);
+  // Staggered delays: letters reveal in sequence
+  const delays = 'Sri Aravindan'.split('').map((_, i) => `${(i * 0.04).toFixed(2)}s`);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[80vh] overflow-hidden">
+    <section className="relative min-h-[80vh] overflow-hidden">
       <div className={`hero-glow ${glowVisible ? 'visible' : ''}`} />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
@@ -87,8 +51,8 @@ export default function HeroSection() {
             {'Sri'.split('').map((char, i) => (
               <span
                 key={i}
-                className="hero-char inline-block transition-transform duration-200 ease-out"
-                style={{ transitionDelay: '0ms' }}
+                className="hero-char inline-block"
+                style={{ animationDelay: delays[i] }}
               >
                 {char}
               </span>
@@ -97,9 +61,9 @@ export default function HeroSection() {
           <span className="block">
             {'Aravindan'.split('').map((char, i) => (
               <span
-                key={i}
-                className="hero-char inline-block transition-transform duration-200 ease-out"
-                style={{ transitionDelay: '0ms' }}
+                key={i + 'Sri'.length}
+                className="hero-char inline-block"
+                style={{ animationDelay: delays[i + 'Sri'.length] }}
               >
                 {char}
               </span>

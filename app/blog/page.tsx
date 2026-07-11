@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import type { Post } from '@/lib/posts';
 import { Calendar, Clock, ArrowUpRight } from 'lucide-react';
 
+// Re-fetch on every request so newly published posts appear immediately
+export const dynamic = 'force-dynamic';
+
 export default async function BlogPage() {
   const { data: posts } = await supabase
     .from('posts')
@@ -54,7 +57,7 @@ export default async function BlogPage() {
                   </span>
                 )}
                 <div className="flex flex-wrap gap-1.5">
-                  {(post.tags ?? []).map((tag) => (
+                  {(post.tags ?? []).map((tag: string) => (
                     <span key={tag} className="mono-label text-[0.5rem]" style={{ color: 'var(--accent)' }}>
                       #{tag}
                     </span>

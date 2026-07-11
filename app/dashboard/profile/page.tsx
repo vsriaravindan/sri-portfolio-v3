@@ -66,28 +66,21 @@ export default function ProfilePage() {
     const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
     const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const token = localStorage.getItem('sb-at');
-    const headers = { apikey: ANON_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-    const body = {
-      display_name: displayName.trim() || null,
-      github_url: githubUrl.trim() || null,
-      bio: bio.trim() || null,
-      blog_handle: blogHandle.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null,
-    };
     try {
-      // Try PATCH first (profile row should exist from signup trigger)
-      let res = await fetch(`${URL}/rest/v1/profiles?id=eq.${user.id}`, {
-        method: 'PATCH',
-        headers: { ...headers, Prefer: 'return=representation' },
-        body: JSON.stringify(body),
+      const res = await fetch(`${URL}/rest/v1/rpc/upsert_my_profile`, {
+        method: 'POST',
+        headers: {
+          apikey: ANON_KEY,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          p_display_name: displayName.trim() || null,
+          p_github_url: githubUrl.trim() || null,
+          p_bio: bio.trim() || null,
+          p_blog_handle: blogHandle.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null,
+        }),
       });
-      // If 404 (no profile row yet), fall back to INSERT
-      if (res.status === 404 || res.status === 406) {
-        res = await fetch(`${URL}/rest/v1/profiles`, {
-          method: 'POST',
-          headers: { ...headers, Prefer: 'return=representation' },
-          body: JSON.stringify([{ id: user.id, ...body }]),
-        });
-      }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `Profile save failed: ${res.status}`);

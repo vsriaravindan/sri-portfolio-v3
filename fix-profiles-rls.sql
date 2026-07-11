@@ -1,0 +1,17 @@
+-- Fix: Allow reading profiles (needed for dashboard + blog author display)
+DROP POLICY IF EXISTS "Profiles are public" ON profiles;
+CREATE POLICY "Profiles are public"
+  ON profiles FOR SELECT
+  USING (true);
+
+-- Allow users to update their own profile via PATCH
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users can update own profile"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+-- Allow users to insert their own profile
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);

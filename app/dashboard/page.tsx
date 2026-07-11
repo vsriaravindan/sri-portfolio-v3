@@ -12,14 +12,20 @@ export default function DashboardPage() {
   const [pwOpen, setPwOpen] = useState(false);
   const [newPw, setNewPw] = useState('');
   const [pwMsg, setPwMsg] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
   const isAdmin = userEmail === 'vsriaravindan@gmail.com';
 
   useEffect(() => {
     api.getUser().then(async (u: any) => {
       setUserEmail(u?.email ?? null);
+      setUserId(u?.id ?? null);
       if (u?.id) {
+        // Admin sees ALL posts; regular users see only their own
+        const filter = u.email === 'vsriaravindan@gmail.com'
+          ? '' // no filter — all posts
+          : `&author_id=eq.${u.id}`;
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?author_id=eq.${u.id}&order=created_at.desc`,
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?select=id,title,slug,published,read_time,created_at,author_id${filter}&order=created_at.desc`,
           { headers: api._headers() }
         );
         const data = await res.json();
@@ -32,11 +38,20 @@ export default function DashboardPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this post?')) return;
     const token = localStorage.getItem('sb-at');
-    await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?id=eq.${id}`, {
-      method: 'DELETE',
-      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, Authorization: `Bearer ${token}` },
-    });
-    setPosts((p) => p.filter((x: any) => x.id !== id));
+    const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { apikey: ANON_KEY!, Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Delete failed: ${res.status}`);
+      }
+      setPosts((p) => p.filter((x: any) => x.id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   const handlePasswordChange = async () => {
@@ -59,6 +74,7 @@ export default function DashboardPage() {
           </h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {userEmail}
+            {isAdmin && <span className="ml-2 text-[var(--accent)] text-[0.6rem]">(Admin — all posts visible)</span>}
           </p>
         </div>
         <Link href="/blog/new" className="btn btn-solid text-[0.65rem]">
@@ -123,7 +139,7 @@ export default function DashboardPage() {
       {/* Posts list */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="mono-label text-[0.65rem]">Your Posts</h2>
+          <h2 className="mono-label text-[0.65rem]">Posts</h2>
           <span className="text-[0.6rem] text-[var(--text-muted)]">{posts.length} total</span>
         </div>
 

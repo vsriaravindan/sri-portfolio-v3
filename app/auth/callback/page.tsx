@@ -9,28 +9,47 @@ import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
+  const [errMsg, setErrMsg] = useState('');
 
   useEffect(() => {
     // Handle both email confirmation (#access_token) and OAuth (#access_token=...)
     const result = api.handleAuthCallback();
-    if (result.error) {
-      setStatus('error');
-    } else if (result.access_token) {
+
+    if (result.access_token) {
+      // Token found and stored — success
       setStatus('success');
-      // Redirect to dashboard after brief delay
       const t = setTimeout(() => router.push('/dashboard'), 1500);
       return () => clearTimeout(t);
-    } else {
-      // Check if there's an error in the URL query params
-      const searchParams = new URLSearchParams(window.location.search);
-      const err = searchParams.get('error') || searchParams.get('error_description');
-      if (err) {
-        setStatus('error');
-      } else {
-        // No token found — user probably landed here directly
-        setStatus('error');
-      }
     }
+
+    if (result.error) {
+      setErrMsg(result.error);
+      setStatus('error');
+      return;
+    }
+
+    // No token returned — check if token already exists in localStorage
+    // (handleAuthCallback may have stored it but URL was already cleaned)
+    const existingToken = (() => {
+      try { return localStorage.getItem('sb-at'); } catch { return null; }
+    })();
+    if (existingToken) {
+      setStatus('success');
+      const t = setTimeout(() => router.push('/dashboard'), 500);
+      return () => clearTimeout(t);
+    }
+
+    // Check URL for error params
+    const searchParams = new URLSearchParams(window.location.search);
+    const err = searchParams.get('error') || searchParams.get('error_description');
+    if (err) {
+      setErrMsg(err);
+      setStatus('error');
+      return;
+    }
+
+    // Nothing to do — redirect to dashboard (user will see login form if not authed)
+    router.push('/dashboard');
   }, [router]);
 
   return (
@@ -63,7 +82,7 @@ export default function AuthCallbackPage() {
             Verification <em>Failed</em>
           </h1>
           <p className="mt-4 text-sm text-[var(--text-secondary)]">
-            The confirmation link was invalid or expired. Try signing up again.
+            {errMsg || 'The confirmation link was invalid or expired. Try signing up again.'}
           </p>
           <Link href="/dashboard" className="btn btn-solid mt-8">
             Back to Dashboard

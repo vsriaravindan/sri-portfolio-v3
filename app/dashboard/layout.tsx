@@ -97,7 +97,7 @@ export default function DashboardLayout({
                 <div className="w-full border-t" style={{ borderColor: 'var(--border-subtle)' }} />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 font-mono text-[0.55rem] uppercase tracking-widest text-[var(--text-muted)]" style={{ background: 'var(--bg-base)' }}>
+                <span className="px-2 font-mono text-[0.55rem] uppercase tracking-widest" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
                   Or continue with
                 </span>
               </div>
@@ -116,7 +116,8 @@ export default function DashboardLayout({
             <button
               type="button"
               onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="mono-label w-full text-center text-[0.6rem] hover:text-[var(--accent)]"
+              className="w-full text-center text-[0.6rem] font-mono uppercase tracking-widest"
+              style={{ color: 'var(--text-primary)', cursor: 'pointer' }}
             >
               {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>

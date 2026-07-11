@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { NAV, SOCIAL } from '@/lib/constants';
-import { Search, ExternalLink, ArrowUpRight } from 'lucide-react';
+import { NAV, SOCIAL, CTA, SITE } from '@/lib/constants';
+import { Search, ExternalLink } from 'lucide-react';
 
 type CmdItem = {
   label: string;
@@ -14,10 +14,23 @@ type CmdItem = {
 };
 
 const allItems: CmdItem[] = [
+  // Pages
   ...NAV.map((n) => ({ ...n, section: 'Pages' })),
+  { label: 'Dashboard', href: '/dashboard', section: 'Pages' },
+  { label: 'New Blog Post', href: '/blog/new', section: 'Pages' },
+  { label: 'Profile Settings', href: '/dashboard/profile', section: 'Pages' },
+  { label: 'Site Settings', href: '/dashboard/content', section: 'Pages' },
+
+  // Projects
+  { label: 'LedgerCalc', href: '/projects/ledgercalc', section: 'Projects' },
+  { label: 'Sri E-Commerce', href: '/projects/ecommerce', section: 'Projects' },
+
+  // Links
   { label: 'GitHub Profile', href: SOCIAL.github, section: 'Links', external: true },
+  { label: 'LinkedIn Profile', href: SOCIAL.linkedin, section: 'Links', external: true },
+  { label: 'Portfolio Source', href: 'https://github.com/vsriaravindan/sri-portfolio-v3', section: 'Links', external: true },
   { label: 'Send Email', href: `mailto:${SOCIAL.email}`, section: 'Links', external: true },
-  { label: 'View Live Demo', href: 'http://140.245.203.57/', section: 'Links', external: true },
+  { label: 'View Live Demo (E-Commerce)', href: CTA.secondary.href, section: 'Links', external: true },
 ];
 
 export default function CommandPalette() {

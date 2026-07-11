@@ -484,6 +484,13 @@ body {
   position: relative;
 }
 
+/* Hamburger only shows on screens < 1024px */
+@media (min-width: 1024px) {
+  .hamburger-btn, .mobile-menu-panel {
+    display: none !important;
+  }
+}
+
 .nav-icon-btn:hover {
   color: var(--accent);
   background: var(--bg-elevated);

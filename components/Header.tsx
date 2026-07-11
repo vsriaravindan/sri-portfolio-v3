@@ -112,7 +112,7 @@ export default function Header() {
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="nav-icon-btn sm:hidden"
+          className="nav-icon-btn hamburger-btn"
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X size={14} /> : <Menu size={14} />}
@@ -120,7 +120,7 @@ export default function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)] px-6 pb-6 pt-4 sm:hidden">
+        <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)] px-6 pb-6 pt-4 mobile-menu-panel">
           <div className="flex flex-col gap-2">
             {NAV.map((item) => (
               <Link

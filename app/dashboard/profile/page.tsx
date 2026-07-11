@@ -63,14 +63,37 @@ export default function ProfilePage() {
     if (!user?.id) return;
     setSaving(true);
     setError('');
+    const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const token = localStorage.getItem('sb-at');
+    const headers = { apikey: ANON_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const body = {
+      display_name: displayName.trim() || null,
+      github_url: githubUrl.trim() || null,
+      bio: bio.trim() || null,
+      blog_handle: blogHandle.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null,
+    };
     try {
-      const updated = await api.upsertProfile({
-        id: user.id,
-        display_name: displayName.trim() || null,
-        github_url: githubUrl.trim() || null,
-        bio: bio.trim() || null,
-        blog_handle: blogHandle.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || null,
+      // Try PATCH first (profile row should exist from signup trigger)
+      let res = await fetch(`${URL}/rest/v1/profiles?id=eq.${user.id}`, {
+        method: 'PATCH',
+        headers: { ...headers, Prefer: 'return=representation' },
+        body: JSON.stringify(body),
       });
+      // If 404 (no profile row yet), fall back to INSERT
+      if (res.status === 404 || res.status === 406) {
+        res = await fetch(`${URL}/rest/v1/profiles`, {
+          method: 'POST',
+          headers: { ...headers, Prefer: 'return=representation' },
+          body: JSON.stringify([{ id: user.id, ...body }]),
+        });
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Profile save failed: ${res.status}`);
+      }
+      const data = await res.json();
+      const updated = Array.isArray(data) ? data[0] : data;
       setProfile(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

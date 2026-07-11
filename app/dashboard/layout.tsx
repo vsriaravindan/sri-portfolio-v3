@@ -26,12 +26,18 @@ export default function DashboardLayout({
         try {
           const p = await api.getProfile(u.id);
           if (!p?.avatar_url) {
-            await api.upsertProfile({
-              id: u.id,
-              avatar_url: u.user_metadata.avatar_url,
-              display_name: u.user_metadata.full_name || u.user_metadata.name || null,
-              github_url: u.user_metadata.user_name ? `https://github.com/${u.user_metadata.user_name}` : null,
-              github_username: u.user_metadata.user_name || null,
+            const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+            const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+            const token = localStorage.getItem('sb-at');
+            await fetch(`${URL}/rest/v1/profiles?id=eq.${u.id}`, {
+              method: 'PATCH',
+              headers: { apikey: ANON_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                avatar_url: u.user_metadata.avatar_url,
+                display_name: u.user_metadata.full_name || u.user_metadata.name || null,
+                github_url: u.user_metadata.user_name ? `https://github.com/${u.user_metadata.user_name}` : null,
+                github_username: u.user_metadata.user_name || null,
+              }),
             });
           }
         } catch {}

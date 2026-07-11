@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/supabase-browser';
-import { Save, Check, Loader2 } from 'lucide-react';
+import { Save, Check, Loader2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 type SectionStatus = { saving: boolean; saved: boolean; error: string };
 
@@ -60,6 +61,17 @@ export default function ContentPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
+      </div>
+    );
+  }
+
+  if (!loading && !isAdmin) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-sm text-[var(--text-secondary)]">Only the admin can edit site content.</p>
+        <Link href="/dashboard" className="btn btn-ghost mt-4 text-[0.65rem]">
+          <ArrowLeft size={12} /> Back to Dashboard
+        </Link>
       </div>
     );
   }

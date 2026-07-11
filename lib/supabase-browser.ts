@@ -47,6 +47,34 @@ export const api = {
     return res.ok ? data : null;
   },
 
+  async updatePassword(newPassword: string) {
+    const token = getToken();
+    if (!token) throw new Error('Not logged in');
+    const res = await fetch(`${url}/auth/v1/user`, {
+      method: 'PUT',
+      headers: { ...authHeaders, Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ password: newPassword }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.msg || 'Password update failed');
+    }
+    return res.json();
+  },
+
+  async sendPasswordReset(email: string) {
+    const res = await fetch(`${url}/auth/v1/recover`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.msg || 'Reset email failed');
+    }
+    return res.json();
+  },
+
   // ── DB Queries (Supabase REST API) ──
   async from(table: string) {
     const self = this;

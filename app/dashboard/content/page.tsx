@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { sbBrowser } from '@/lib/supabase-browser';
+import { api } from '@/lib/supabase-browser';
 import { Save, Check, Loader2 } from 'lucide-react';
 
 type SectionStatus = { saving: boolean; saved: boolean; error: string };
@@ -24,17 +24,15 @@ export default function ContentPage() {
   const [status, setStatus] = useState<Record<string, SectionStatus>>({});
 
   useEffect(() => {
-    sbBrowser
-      .from('site_content' as any)
-      .select('section, content')
-      .then(({ data: rows }: any) => {
-        const map: Record<string, unknown> = {};
-        (rows ?? []).forEach((r: any) => {
-          map[r.section] = r.content;
-        });
-        setData(map);
-        setLoading(false);
+    api.from('site_content').then((tb: any) => tb.select('section,content')).then(({ data }: any) => {
+      const rows = data ?? [];
+      const map: Record<string, unknown> = {};
+      rows.forEach((r: any) => {
+        map[r.section] = r.content;
       });
+      setData(map);
+      setLoading(false);
+    });
   }, []);
 
   const update = (section: string, value: unknown) => {
@@ -43,9 +41,8 @@ export default function ContentPage() {
 
   const save = async (section: string) => {
     setStatus((prev) => ({ ...prev, [section]: { saving: true, saved: false, error: '' } }));
-    const { error } = await sbBrowser
-      .from('site_content' as any)
-      .upsert({ section, content: data[section], updated_at: new Date().toISOString() } as any);
+    const tb = await api.from('site_content');
+    const { error } = await tb.upsert({ section, content: data[section], updated_at: new Date().toISOString() });
     if (error) {
       setStatus((prev) => ({ ...prev, [section]: { saving: false, saved: false, error: error.message } }));
     } else {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { sbBrowser, signUp, signIn, signOut } from '@/lib/supabase-browser';
+import { api } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { ArrowLeft, LogOut, Loader2 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
@@ -19,11 +19,10 @@ export default function DashboardLayout({
   const [mode, setMode] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
-    const token = localStorage.getItem('sb-access-token');
-    if (token) {
-      setUser({ email: localStorage.getItem('sb-user-email') } as any);
-    }
-    setLoading(false);
+    api.getUser().then((user) => {
+      setUser(user as any);
+      setLoading(false);
+    });
   }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -31,20 +30,17 @@ export default function DashboardLayout({
     setError('');
     try {
       if (mode === 'signup') {
-        await signUp(email, password);
+        await api.signUp(email, password);
       }
-      const data = await signIn(email, password);
-      localStorage.setItem('sb-access-token', data.access_token);
-      localStorage.setItem('sb-user-email', email);
-      await sbBrowser.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token ?? '' });
-      setUser({ email } as any);
+      const user = await api.signIn(email, password);
+      setUser(user as any);
     } catch (err: any) {
       setError(err.message || 'Auth failed');
     }
   };
 
   const handleLogout = async () => {
-    await signOut();
+    await api.signOut();
     setUser(null);
   };
 

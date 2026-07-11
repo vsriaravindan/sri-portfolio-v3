@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { sbBrowser } from '@/lib/supabase-browser';
+import { api } from '@/lib/supabase-browser';
 import { EditorContent, EditorRoot, JSONContent } from 'novel';
 import { ArrowLeft, Calendar, Clock, Loader2 } from 'lucide-react';
 import type { Post } from '@/lib/posts';
@@ -18,15 +18,12 @@ export default function BlogPostPage() {
 
   useEffect(() => {
     if (!slug) return;
-    sbBrowser
-      .from('posts' as any)
-      .select('*')
-      .eq('slug', slug)
-      .single()
-      .then(({ data, error }: any) => {
-        if (!error && data) setPost(data as Post);
-        setLoading(false);
-      });
+    api.from('posts').then((tb: any) => tb.select('*')).then(({ data, error }: any) => {
+      // The REST API returns an array; find by slug client-side
+      const post = (data ?? []).find((p: any) => p.slug === slug);
+      if (post) setPost(post as Post);
+      setLoading(false);
+    });
   }, [slug]);
 
   if (loading) {

@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { sbBrowser } from '@/lib/supabase-browser';
+import { api } from '@/lib/supabase-browser';
 import {
   EditorRoot, EditorContent, EditorBubble, EditorBubbleItem,
   EditorCommand, EditorCommandList, EditorCommandItem, EditorCommandEmpty,
@@ -34,8 +34,8 @@ export default function NewPostPage() {
     setPublishing(true);
     const finalSlug = slug || generateSlug(title);
     try {
-      const sb = sbBrowser;
-      await (sb.from('posts' as any) as any).insert({
+      const tb = await api.from('posts');
+      await tb.insert({
         title: title.trim(),
         slug: finalSlug,
         content: content ?? {},

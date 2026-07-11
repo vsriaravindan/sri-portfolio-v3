@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { NAV, SOCIAL, CTA, SITE } from '@/lib/constants';
-import { Search, ExternalLink } from 'lucide-react';
+import { NAV, SOCIAL, CTA } from '@/lib/constants';
+import { Search, ExternalLink, FileText } from 'lucide-react';
+
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
 type CmdItem = {
   label: string;
@@ -13,7 +16,7 @@ type CmdItem = {
   external?: boolean;
 };
 
-const allItems: CmdItem[] = [
+const staticItems: CmdItem[] = [
   // Pages
   ...NAV.map((n) => ({ ...n, section: 'Pages' })),
   { label: 'Dashboard', href: '/dashboard', section: 'Pages' },
@@ -38,8 +41,12 @@ export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
+  const [blogPosts, setBlogPosts] = useState<CmdItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Build full items list — static items + blog posts fetched from Supabase
+  const allItems: CmdItem[] = [...staticItems, ...blogPosts];
 
   const filtered = query
     ? allItems.filter((item) =>
@@ -59,6 +66,30 @@ export default function CommandPalette() {
     },
     []
   );
+
+  // Fetch blog posts when palette opens
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    fetch(`${URL}/rest/v1/posts?select=title,slug&published=eq.true&order=created_at.desc&limit=50`, {
+      headers: { apikey: ANON_KEY },
+      signal: controller.signal,
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setBlogPosts(
+            data.map((p: any) => ({
+              label: p.title,
+              href: `/blog/${p.slug}`,
+              section: 'Blog Posts',
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [open]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -138,7 +169,7 @@ export default function CommandPalette() {
             ref={inputRef}
             type="text"
             className="cmd-input"
-            placeholder="Search pages, links..."
+            placeholder="Search pages, blog posts, links..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -160,6 +191,7 @@ export default function CommandPalette() {
               {sec.items.map((item) => {
                 const idx = globalIdx++;
                 const active = idx === activeIdx;
+                const isBlog = item.section === 'Blog Posts';
                 return (
                   <button
                     key={item.href}
@@ -167,6 +199,7 @@ export default function CommandPalette() {
                     onClick={() => navigate(item)}
                     onMouseEnter={() => setActiveIdx(idx)}
                   >
+                    {isBlog && <FileText size={14} className="shrink-0 text-[var(--accent)]" />}
                     <span className="cmd-item-label">{item.label}</span>
                     {item.external && (
                       <ExternalLink className="cmd-item-external" size={14} />

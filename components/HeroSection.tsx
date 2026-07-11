@@ -14,9 +14,9 @@ export default function HeroSection() {
     setGlowVisible(true);
   }, []);
 
+  // ── Mouse parallax (desktop) ──
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!sectionRef.current || !nameRef.current) return;
-
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
     rafRef.current = requestAnimationFrame(() => {
@@ -32,8 +32,7 @@ export default function HeroSection() {
         const x = dx * speed;
         const y = dy * speed;
         const rotate = (dx * dy) * 3;
-        (char as HTMLElement).style.transform =
-          `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+        (char as HTMLElement).style.setProperty('transform', `translate(${x}px, ${y}px) rotate(${rotate}deg)`, 'important');
       });
     });
   }, []);
@@ -41,10 +40,44 @@ export default function HeroSection() {
   const handleMouseLeave = useCallback(() => {
     if (!nameRef.current) return;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
     const letters = nameRef.current.querySelectorAll('.hero-char');
     letters.forEach((char) => {
-      (char as HTMLElement).style.transform = 'translate(0, 0) rotate(0deg)';
+      (char as HTMLElement).style.removeProperty('transform');
+    });
+  }, []);
+
+  // ── Touch parallax (mobile) ──
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!sectionRef.current || !nameRef.current || !e.touches[0]) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+    rafRef.current = requestAnimationFrame(() => {
+      const rect = sectionRef.current!.getBoundingClientRect();
+      const touch = e.touches[0];
+      const dx = (touch.clientX - rect.left) / rect.width - 0.5;
+      const dy = (touch.clientY - rect.top) / rect.height - 0.5;
+
+      const letters = nameRef.current!.querySelectorAll('.hero-char');
+      letters.forEach((char, i) => {
+        const speed = 6 + (i % 5) * 1.5;
+        const x = dx * speed;
+        const y = dy * speed;
+        (char as HTMLElement).style.setProperty('animation', 'none', 'important');
+        (char as HTMLElement).style.setProperty('transform', `translate(${x}px, ${y}px)`, 'important');
+      });
+    });
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!nameRef.current) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    const letters = nameRef.current.querySelectorAll('.hero-char');
+    letters.forEach((char) => {
+      (char as HTMLElement).style.removeProperty('transform');
+      (char as HTMLElement).style.removeProperty('animation');
+      // Re-trigger wave animation by toggling
+      void (char as HTMLElement).offsetWidth;
+      (char as HTMLElement).style.animation = '';
     });
   }, []);
 
@@ -54,13 +87,21 @@ export default function HeroSection() {
 
     section.addEventListener('mousemove', handleMouseMove);
     section.addEventListener('mouseleave', handleMouseLeave);
+    section.addEventListener('touchmove', handleTouchMove, { passive: true });
+    section.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       section.removeEventListener('mousemove', handleMouseMove);
       section.removeEventListener('mouseleave', handleMouseLeave);
+      section.removeEventListener('touchmove', handleTouchMove);
+      section.removeEventListener('touchend', handleTouchEnd);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [handleMouseMove, handleMouseLeave]);
+  }, [handleMouseMove, handleMouseLeave, handleTouchMove, handleTouchEnd]);
+
+  // Build wave delays: staggered so letters ripple in sequence
+  const name = 'Sri Aravindan';
+  const delays = name.split('').map((_, i) => `${(i * 0.08).toFixed(2)}s`);
 
   return (
     <section ref={sectionRef} className="relative min-h-[80vh] overflow-hidden">
@@ -87,8 +128,8 @@ export default function HeroSection() {
             {'Sri'.split('').map((char, i) => (
               <span
                 key={i}
-                className="hero-char inline-block transition-transform duration-200 ease-out"
-                style={{ transitionDelay: '0ms' }}
+                className="hero-char inline-block"
+                style={{ animationDelay: delays[i] }}
               >
                 {char}
               </span>
@@ -97,9 +138,9 @@ export default function HeroSection() {
           <span className="block">
             {'Aravindan'.split('').map((char, i) => (
               <span
-                key={i}
-                className="hero-char inline-block transition-transform duration-200 ease-out"
-                style={{ transitionDelay: '0ms' }}
+                key={i + 'Sri'.length}
+                className="hero-char inline-block"
+                style={{ animationDelay: delays[i + 'Sri'.length] }}
               >
                 {char}
               </span>

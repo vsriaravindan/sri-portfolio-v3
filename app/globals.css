@@ -551,23 +551,53 @@ body {
   color: var(--accent);
 }
 
-/* Hero glitch hover effect */
+/* ── Hero name — auto wave + neon glow (all devices) ── */
 .hero-char {
   display: inline-block;
-  transition: text-shadow var(--dur-fast) var(--ease-standard),
-              transform var(--dur-fast) var(--ease-standard),
-              color var(--dur-fast) var(--ease-standard);
   cursor: default;
+  animation: hero-char-wave 2.8s ease-in-out infinite;
+  will-change: transform, color, text-shadow;
 }
 
+/* Hover glow (desktop) */
 .hero-char:hover {
-  color: var(--accent);
-  text-shadow: 0 0 10px var(--accent),
-               0 0 20px var(--accent),
-               0 0 40px var(--accent-muted),
-               2px 2px 0 var(--accent-muted),
-               -1px -1px 0 rgba(0,255,65,0.3);
-  transform: translateY(-2px);
+  color: var(--accent) !important;
+  text-shadow:
+    0 0 10px var(--accent),
+    0 0 20px var(--accent),
+    0 0 40px var(--accent-muted),
+    2px 2px 0 var(--accent-muted),
+    -1px -1px 0 rgba(0,255,65,0.3) !important;
+  animation: none; /* freeze wave on hover */
+  transform: translateY(-3px) !important;
+}
+
+@keyframes hero-char-wave {
+  0%, 100% {
+    transform: translateY(0);
+    color: inherit;
+    text-shadow: none;
+  }
+  50% {
+    transform: translateY(-5px);
+    color: var(--accent);
+    text-shadow:
+      0 0 6px var(--accent-muted),
+      0 0 15px var(--accent-muted);
+  }
+}
+
+@keyframes hero-touch-pulse {
+  0% { text-shadow: none; transform: translateY(0); }
+  30% {
+    color: var(--accent);
+    text-shadow:
+      0 0 10px var(--accent),
+      0 0 30px var(--accent-muted),
+      0 0 60px var(--accent-muted);
+    transform: translateY(-5px);
+  }
+  100% { text-shadow: none; transform: translateY(0); }
 }
 
 .divider {

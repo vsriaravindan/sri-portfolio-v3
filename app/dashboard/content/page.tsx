@@ -22,8 +22,13 @@ export default function ContentPage() {
   const [data, setData] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<Record<string, SectionStatus>>({});
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const isAdmin = userEmail === 'vsriaravindan@gmail.com';
 
   useEffect(() => {
+    api.getUser().then((user: any) => {
+      setUserEmail(user?.email ?? null);
+    });
     api.from('site_content').then((tb: any) => tb.select('section,content')).then(({ data }: any) => {
       const rows = data ?? [];
       const map: Record<string, unknown> = {};
@@ -95,20 +100,26 @@ export default function ContentPage() {
             <h2 className="mono-label text-[0.65rem]">
               {sections.find((s) => s.key === activeSection)?.label}
             </h2>
-            <button
-              onClick={() => save(activeSection)}
-              disabled={s.saving}
-              className="btn btn-solid text-[0.65rem]"
-            >
-              {s.saving ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : s.saved ? (
-                <Check size={12} />
-              ) : (
-                <Save size={12} />
-              )}
-              {s.saving ? 'Saving...' : s.saved ? 'Saved!' : 'Save'}
-            </button>
+            {isAdmin ? (
+              <button
+                onClick={() => save(activeSection)}
+                disabled={s.saving}
+                className="btn btn-solid text-[0.65rem]"
+              >
+                {s.saving ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : s.saved ? (
+                  <Check size={12} />
+                ) : (
+                  <Save size={12} />
+                )}
+                {s.saving ? 'Saving...' : s.saved ? 'Saved!' : 'Save'}
+              </button>
+            ) : (
+              <span className="font-mono text-[0.55rem] text-[var(--text-muted)]">
+                Read-only view
+              </span>
+            )}
           </div>
           {s.error && (
             <p className="mb-4 text-sm text-[var(--signal-error)]">{s.error}</p>

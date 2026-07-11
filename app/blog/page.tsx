@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function BlogPage() {
   const { data: posts } = await supabase
     .from('posts')
-    .select('id, title, slug, excerpt, tags, read_time, created_at, cover_url, author_id')
+    .select('id, title, slug, excerpt, tags, read_time, created_at, cover_url, author_id, likes_count')
     .eq('published', true)
     .order('created_at', { ascending: false });
 
@@ -81,6 +81,11 @@ export default async function BlogPage() {
                         <User size={11} />
                       )}
                       {author.display_name || author.github_username || 'Author'}
+                    </span>
+                  )}
+                  {(post as any).likes_count > 0 && (
+                    <span className="flex items-center gap-1">
+                      ❤️ {(post as any).likes_count}
                     </span>
                   )}
                   <div className="flex flex-wrap gap-1.5">

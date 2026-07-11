@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Calendar, Clock, ArrowLeft, User } from 'lucide-react';
 import BlogPostReader from './BlogPostReader';
+import BlogActions from './BlogActions';
 
 export default async function BlogPostPage({
   params,
@@ -99,6 +100,9 @@ export default async function BlogPostPage({
       <div className="prose-custom mt-10">
         <BlogPostReader content={post.content} />
       </div>
+
+      {/* Likes + Comments */}
+      <BlogActions postId={post.id} />
     </article>
   );
 }

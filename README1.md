@@ -73,7 +73,7 @@ sri-portfolio/
 ### Auth
 - Email/password authentication with email confirmation
 - **GitHub OAuth** — Sign in with GitHub button on dashboard, auto-populates profile
-- Custom SMTP: elalastair@gmail.com (Gmail app password)
+- Custom SMTP: realmext00@gmail.com (Gmail app password)
 - Redirect URLs pointing to Vercel
 
 ### Storage Buckets
@@ -82,7 +82,7 @@ sri-portfolio/
 
 ### SMTP Setup
 - Host: smtp.gmail.com, Port: 465
-- Username: elalastair@gmail.com
+- Username: realmext00@gmail.com
 - Password: Gmail app password (generated from Google Account → App Passwords)
 - Sender name: "Sri Aravindan"
 

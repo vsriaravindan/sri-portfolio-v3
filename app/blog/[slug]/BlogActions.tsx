@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { api } from '@/lib/supabase-browser';
+import { subscribeComments } from '@/lib/realtime';
 import { Heart, MessageCircle, Send, User, Trash2 } from 'lucide-react';
 
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -43,6 +44,7 @@ export default function BlogActions({ postId }: { postId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
   const [posting, setPosting] = useState(false);
+  const [commentError, setCommentError] = useState('');
   const [profiles, setProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
   const mounted = useRef(true);
 
@@ -106,6 +108,41 @@ export default function BlogActions({ postId }: { postId: string }) {
     });
   }, [postId]);
 
+  // ── Live comment subscription via WebSocket ──
+  useEffect(() => {
+    const unsub = subscribeComments(postId, (newComment: any) => {
+      if (!mounted.current) return;
+      // Dedup — skip if already in list (user's own POST response)
+      setComments((prev) => {
+        if (prev.some((c) => c.id === newComment.id)) return prev;
+        // Fetch author profile for the new comment
+        const authorId = newComment.author_id as string;
+        if (authorId) {
+          fetch(`${URL}/rest/v1/profiles?id=eq.${authorId}&select=id,display_name,avatar_url`, {
+            headers: { apikey: ANON_KEY },
+          })
+            .then((r) => r.json())
+            .then((profs: any) => {
+              if (!mounted.current) return;
+              const p = Array.isArray(profs) ? profs[0] : null;
+              if (p) {
+                setProfiles((prev) => ({ ...prev, [authorId]: p }));
+              }
+            })
+            .catch(() => {});
+        }
+        const comment: Comment = {
+          id: newComment.id as string,
+          content: newComment.content as string,
+          created_at: newComment.created_at as string,
+          author_id: newComment.author_id as string,
+        };
+        return [comment, ...prev];
+      });
+    });
+    return () => unsub();
+  }, [postId]);
+
   const handleLike = async () => {
     const vid = getVisitorId();
     const likedSet = getLikedPosts();
@@ -145,31 +182,57 @@ export default function BlogActions({ postId }: { postId: string }) {
     e.preventDefault();
     if (!commentText.trim() || !user?.id) return;
     setPosting(true);
+    setCommentError('');
 
     const token = localStorage.getItem('sb-at');
-    const body = JSON.stringify([{
-      post_id: postId,
-      author_id: user.id,
-      content: commentText.trim(),
-    }]);
+    try {
+      const res = await fetch(`${URL}/rest/v1/rpc/insert_comment`, {
+        method: 'POST',
+        headers: {
+          apikey: ANON_KEY,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          p_post_id: postId,
+          p_content: commentText.trim(),
+        }),
+      });
 
-    const res = await fetch(`${URL}/rest/v1/comments`, {
-      method: 'POST',
-      headers: {
-        apikey: ANON_KEY,
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation',
-      },
-      body,
-    });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Comment failed: ${res.status}`);
+      }
 
-    if (res.ok) {
-      const newComments = await res.json();
-      setComments((prev) => [...(Array.isArray(newComments) ? newComments : []), ...prev]);
+      const newComment = await res.json();
+      // Fetch author profile for the new comment
+      if (newComment && user?.id) {
+        fetch(`${URL}/rest/v1/profiles?id=eq.${user.id}&select=id,display_name,avatar_url`, {
+          headers: { apikey: ANON_KEY },
+        })
+          .then((r) => r.json())
+          .then((profs: any) => {
+            if (!mounted.current) return;
+            const p = Array.isArray(profs) ? profs[0] : null;
+            if (p) {
+              setProfiles((prev) => ({ ...prev, [user.id]: p }));
+            }
+          })
+          .catch(() => {});
+      }
+      const entry: Comment = {
+        id: newComment.id as string,
+        content: newComment.content as string,
+        created_at: newComment.created_at as string,
+        author_id: newComment.author_id as string,
+      };
+      setComments((prev) => [entry, ...prev]);
       setCommentText('');
+    } catch (err: any) {
+      setCommentError(err.message || 'Failed to post comment');
+    } finally {
+      setPosting(false);
     }
-    setPosting(false);
   };
 
   const handleDeleteComment = async (commentId: string) => {
@@ -235,6 +298,10 @@ export default function BlogActions({ postId }: { postId: string }) {
           </a>{' '}
           to leave a comment.
         </p>
+      )}
+
+      {commentError && (
+        <p className="mt-4 text-sm" style={{ color: 'var(--signal-error)' }}>{commentError}</p>
       )}
 
       {/* Comments list */}

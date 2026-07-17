@@ -155,11 +155,6 @@ export default function DevOpsPage() {
             alt="Last Commit"
             className="h-7"
           />
-          <img
-            src={`https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/${GITHUB_REPO}/main/.github/badges/uptime.json&style=for-the-badge`}
-            alt="Uptime"
-            className="h-7"
-          />
         </div>
       </section>
 

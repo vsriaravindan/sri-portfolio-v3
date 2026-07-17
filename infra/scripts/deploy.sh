@@ -3,7 +3,7 @@
 set -euo pipefail
 
 APP_DIR="/opt/sri-portfolio"
-IMAGE="ghcr.io/vsriaravindan/sri-portfolio:latest"
+IMAGE="ghcr.io/vsriaravindan/sri-portfolio-v3:latest"
 
 cd "$APP_DIR"
 

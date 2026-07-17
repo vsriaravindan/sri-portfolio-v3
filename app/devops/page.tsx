@@ -36,8 +36,8 @@ export default function DevOpsPage() {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const GITHUB_REPO = 'vsriaravindan/sri-portfolio';
-  const GHCR_PACKAGE = 'ghcr.io/vsriaravindan/sri-portfolio';
+  const GITHUB_REPO = 'vsriaravindan/sri-portfolio-v3';
+  const GHCR_PACKAGE = 'ghcr.io/vsriaravindan/sri-portfolio-v3';
 
   useEffect(() => {
     async function fetchData() {

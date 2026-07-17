@@ -180,11 +180,11 @@ export default function DevOpsPage() {
                   href={run.html_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-lg bg-[var(--bg-base)] px-3 py-2 text-xs transition-colors hover:bg-[var(--bg-elevated)]"
+                  className="flex items-center gap-3 rounded-lg bg-[var(--bg-base)] px-3 py-2 text-xs transition-all hover:bg-[var(--bg-elevated)] hover:text-[var(--accent)] group cursor-pointer"
                 >
                   {statusIcon(run.conclusion)}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-[var(--text-primary)]">
+                    <p className="truncate font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                       {run.name || run.head_commit?.message || 'Build'}
                     </p>
                     <p className="text-[var(--text-muted)]">
@@ -205,23 +205,26 @@ export default function DevOpsPage() {
           {deployments.length === 0 ? (
             <div className="space-y-2">
               {runs.slice(0, 5).map((run) => (
-                <div
+                <a
                   key={run.id}
-                  className="flex items-center gap-3 rounded-lg bg-[var(--bg-base)] px-3 py-2 text-xs"
+                  href={run.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-lg bg-[var(--bg-base)] px-3 py-2 text-xs transition-all hover:bg-[var(--bg-elevated)] hover:text-[var(--accent)] group cursor-pointer"
                 >
                   {statusIcon(run.conclusion)}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-[var(--text-primary)]">
+                    <p className="truncate font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                       {run.head_commit?.message || 'Deploy'}
                     </p>
                     <p className="text-[var(--text-muted)]">
                       {formatDate(run.updated_at)}
                     </p>
                   </div>
-                  <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 font-mono text-[0.6rem] text-[var(--text-muted)]">
+                  <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 font-mono text-[0.6rem] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors">
                     {run.conclusion || 'running'}
                   </code>
-                </div>
+                </a>
               ))}
             </div>
           ) : (

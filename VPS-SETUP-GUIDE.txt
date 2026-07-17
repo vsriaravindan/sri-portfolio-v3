@@ -1,0 +1,158 @@
+======================================================
+ SRI PORTFOLIO v4 — VPS Setup & Operations Guide
+======================================================
+Oracle Cloud Ubuntu 24.04 | Docker + Nginx + GitHub Actions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. SYSTEM SETUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Install Docker (v29.6.2)
+sudo apt-get update -qq
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list
+sudo apt-get update -qq
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo usermod -aG docker ubuntu
+
+# Verify
+docker --version
+docker compose version
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. NGINX CONFIGURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Nginx was already installed. Created two configs:
+
+# /etc/nginx/conf.d/sriaravindan.com.conf
+# Routes sriaravindan.com → portfolio (port 3000)
+server {
+    listen 80;
+    server_name sriaravindan.com www.sriaravindan.com;
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# /etc/nginx/conf.d/sri-shoping.conf (pre-existing)
+# Routes IP-based access → sri-shoping (port 5000)
+server {
+    listen 80;
+    server_name _;
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+    }
+}
+
+# Test + restart nginx
+sudo nginx -t
+sudo systemctl restart nginx
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. INITIAL DOCKER DEPLOY (MANUAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Only needed once. Future deploys via CI/CD.
+
+# Login to GitHub Container Registry
+echo "ghp_xxx" | docker login ghcr.io -u vsriaravindan --password-stdin
+
+# Pull the pre-built image (built by GitHub Actions, not VPS)
+cd /opt/sri-portfolio
+docker compose pull
+
+# Run the container
+docker compose up -d --force-recreate
+
+# Verify
+docker ps
+curl -s http://localhost:3000/api/health
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CI/CD PIPELINE (GitHub Actions)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# On every push to main:
+#   1. CI workflow: lint → type-check
+#   2. CD workflow: build Docker → push to GHCR → SSH into VPS → pull & restart
+
+# GitHub Secrets configured:
+#   GHCR_TOKEN          — PAT with write:packages, read:packages, repo, workflow
+#   VPS_HOST            — 140.245.203.57
+#   VPS_USER            — ubuntu
+#   VPS_SSH_KEY         — ed25519 private key for GitHub Actions
+#   NEXT_PUBLIC_SUPABASE_URL    — Supabase project URL
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY — Supabase anon key
+
+# Deploy key added to VPS:
+#   ~/.ssh/authorized_keys — public key of gh-actions-deploy-key
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. KEY FILES ON THIS VPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/opt/sri-portfolio/
+  ├── Dockerfile              # Multi-stage: deps → build → runner
+  ├── docker-compose.yml      # Service definition (port 3000)
+  ├── .dockerignore          
+  ├── app/                    # Next.js source
+  ├── components/             
+  └── lib/                    
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. USEFUL COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# View running containers
+docker ps
+
+# View portfolio logs
+docker logs sri-portfolio
+
+# Check health
+curl -s http://localhost:3000/api/health
+
+# Restart portfolio (after CD pulls new image)
+cd /opt/sri-portfolio && docker compose pull && docker compose up -d --force-recreate
+
+# Check nginx status
+sudo systemctl status nginx
+
+# Check nginx config
+sudo nginx -t
+
+# Reload nginx after config change
+sudo systemctl reload nginx
+
+# SSH from local (Windows)
+ssh -i ~/.ssh/private_ssh-key-2026-06-28.key ubuntu@140.245.203.57
+
+# Check memory
+free -h
+
+# Check swap
+swapon --show
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Browser → Cloudflare (DNS + SSL proxy) → Oracle VPS
+                                              ↓
+                                         Nginx (port 80)
+                                        /               \
+                          sriaravindan.com         140.245.203.57
+                                ↓                        ↓
+                    Portfolio (Docker :3000)    sri-shoping (PM2 :5000)
+
+CI/CD: GitHub → GitHub Actions → GHCR → SSH → VPS pulls & restarts

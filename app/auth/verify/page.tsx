@@ -67,6 +67,12 @@ function VerifyForm() {
       if (type === 'password_change' || type === 'forgot_password') {
         setStep('done');
       } else {
+        // Signup: now sign the user in (token was not stored during signup)
+        const pw = sessionStorage.getItem('otp-pw');
+        if (pw) {
+          try { await api.signIn(email, pw); } catch {}
+          sessionStorage.removeItem('otp-pw');
+        }
         sessionStorage.removeItem('otp-email');
         sessionStorage.removeItem('otp-type');
         router.push('/dashboard');

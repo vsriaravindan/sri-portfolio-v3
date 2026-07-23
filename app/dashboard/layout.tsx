@@ -53,8 +53,9 @@ export default function DashboardLayout({
     try {
       if (mode === 'signup') {
         await api.signUp(email, password);
-        // Store email and navigate to OTP verify page
+        // Store email + password in sessionStorage for OTP verify page to auto-login
         sessionStorage.setItem('otp-email', email);
+        sessionStorage.setItem('otp-pw', password);
         sessionStorage.setItem('otp-type', 'signup');
         router.push('/auth/verify?email=' + encodeURIComponent(email) + '&type=signup');
         return;

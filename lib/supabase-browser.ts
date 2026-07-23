@@ -14,7 +14,7 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.msg || data.error_description || 'Signup failed');
-    if (data.access_token) setToken(data.access_token, data.refresh_token ?? '');
+    // Don't auto-store token — OTP must be verified first
     return data;
   },
 

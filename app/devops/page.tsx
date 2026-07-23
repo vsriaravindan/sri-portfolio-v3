@@ -30,6 +30,15 @@ interface HealthData {
   timestamp: string;
 }
 
+interface ContainerHealth {
+  name: string;
+  status: string;
+  health: string;
+  ports: string;
+  uptime: string;
+  type: 'docker' | 'pm2';
+}
+
 export default function DevOpsPage() {
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
   const [deployments, setDeployments] = useState<Deployment[]>([]);

@@ -2,6 +2,7 @@ import HeroSection from '@/components/HeroSection';
 import ProjectCard from '@/components/ProjectCard';
 import Band from '@/components/Band';
 import ScrollReveal from '@/components/ScrollReveal';
+import ScrollProgressBar from '@/components/ScrollProgressBar';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Project } from '@/lib/projects';
@@ -83,6 +84,7 @@ export default async function Home() {
 
   return (
     <>
+      <ScrollProgressBar />
       <HeroSection />
 
       <ScrollReveal>

@@ -149,7 +149,7 @@ export default function DashboardLayout({
               Sign in with GitHub
             </button>
 
-            {/* Forgot password — themed hover */}
+            {/* Forgot password — animated underline */}
             {mode === 'login' && (
               <button
                 type="button"
@@ -159,21 +159,23 @@ export default function DashboardLayout({
                   sessionStorage.setItem('otp-type', 'forgot_password');
                   router.push('/auth/verify?email=' + encodeURIComponent(email) + '&type=forgot_password');
                 }}
-                className="w-full text-center text-[0.55rem] font-mono uppercase tracking-widest transition-colors duration-150 hover:text-[var(--accent)]"
+                className="group relative w-full text-center text-[0.55rem] font-mono uppercase tracking-widest transition-colors duration-150 hover:text-[var(--accent)]"
                 style={{ color: 'var(--text-muted)' }}
               >
                 Forgot password?
+                <span className="absolute bottom-[-2px] left-1/2 h-[1px] w-0 -translate-x-1/2 bg-[var(--accent)] transition-all duration-300 group-hover:w-1/2" />
               </button>
             )}
 
-            {/* Mode toggle — themed hover */}
+            {/* Mode toggle — animated underline + accent color */}
             <button
               type="button"
               onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); }}
-              className="w-full text-center text-[0.6rem] font-mono uppercase tracking-widest transition-colors duration-150 hover:text-[var(--accent)]"
+              className="group relative w-full text-center text-[0.6rem] font-mono uppercase tracking-widest transition-colors duration-150 hover:text-[var(--accent)]"
               style={{ color: 'var(--text-primary)', cursor: 'pointer' }}
             >
               {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+              <span className="absolute bottom-[-2px] left-1/2 h-[1px] w-0 -translate-x-1/2 bg-[var(--accent)] transition-all duration-300 group-hover:w-3/4" />
             </button>
           </form>
         </div>

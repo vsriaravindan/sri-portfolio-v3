@@ -104,6 +104,29 @@ export const api = {
     return res.json();
   },
 
+  // ── OTP-based Auth ──
+  async sendOtp(email: string, type: 'signup' | 'password_change' | 'forgot_password') {
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, type }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
+    return data;
+  },
+
+  async verifyOtp(email: string, otp: string, type: string) {
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, type }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'OTP verification failed');
+    return data;
+  },
+
   // ── DB Queries (Supabase REST API) ──
   async from(table: string) {
     const self = this;

@@ -55,13 +55,25 @@ export default function DashboardPage() {
   };
 
   const handlePasswordChange = async () => {
+    if (!userEmail) return;
+    try {
+      await api.sendOtp(userEmail, 'password_change');
+      // Show OTP modal — the layout handles OTP input
+      // The user can now enter OTP in the layout's modal
+      setPwMsg('Verification code sent to your email');
+    } catch (err: any) {
+      setPwMsg(err.message || 'Failed to send OTP');
+    }
+  };
+
+  const handlePasswordChangeDirect = async () => {
     if (newPw.length < 6) { setPwMsg('Password must be 6+ characters'); return; }
     try {
-      await api.sendPasswordReset(userEmail!);
-      setPwMsg('Reset link sent to your email');
+      await api.updatePassword(newPw);
+      setPwMsg('Password updated successfully');
       setNewPw('');
     } catch (err: any) {
-      setPwMsg(err.message);
+      setPwMsg(err.message || 'Failed to update password');
     }
   };
 
@@ -119,18 +131,11 @@ export default function DashboardPage() {
       {/* Change password form */}
       {pwOpen && (
         <div className="mb-8 rounded-sm border p-4" style={{ borderColor: 'var(--border-subtle)' }}>
-          <p className="mono-label text-[0.55rem]">Send password reset link to your email</p>
+          <p className="mono-label text-[0.55rem]">Verify via OTP to change your password</p>
           <div className="mt-3 flex items-end gap-3">
-            <input
-              type="password"
-              value={newPw}
-              onChange={(e) => setNewPw(e.target.value)}
-              placeholder="New password (optional — set in email)"
-              className="site-input flex-1 px-3 py-2 text-sm"
-            />
-            <button onClick={handlePasswordChange} className="btn btn-solid text-[0.65rem]">
-              Send Reset Link
-            </button>
+          <button onClick={handlePasswordChange} className="btn btn-solid text-[0.65rem]">
+            Send OTP Code
+          </button>
           </div>
           {pwMsg && <p className="mt-2 text-sm" style={{ color: pwMsg.includes('sent') ? 'var(--accent)' : 'var(--signal-error)' }}>{pwMsg}</p>}
         </div>

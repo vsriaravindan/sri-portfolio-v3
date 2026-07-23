@@ -19,14 +19,27 @@ export const api = {
   },
 
   async signIn(email: string, password: string) {
-    const res = await fetch(`${url}/auth/v1/token?grant_type=password`, {
-      method: 'POST', headers: authHeaders,
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.msg || data.error_description || 'Login failed');
-    setToken(data.access_token, data.refresh_token ?? '');
-    return data;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch(`${url}/auth/v1/token?grant_type=password`, {
+          method: 'POST', headers: authHeaders,
+          body: JSON.stringify({ email, password }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.msg || data.error_description || 'Login failed');
+        setToken(data.access_token, data.refresh_token ?? '');
+        return data;
+      } catch (err: any) {
+        clearTimeout(timeout);
+        if (attempt === 1) throw new Error(err.name === 'AbortError' ? 'Connection timed out. Check your network and try again.' : (err.message || 'Login failed'));
+        // Retry once on first failure
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
   },
 
   /** Redirect the user to GitHub OAuth. Callback lands on /auth/callback */

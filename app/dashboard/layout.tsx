@@ -19,6 +19,7 @@ export default function DashboardLayout({
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     api.getUser().then(async (u: any) => {
@@ -50,6 +51,7 @@ export default function DashboardLayout({
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
     try {
       if (mode === 'signup') {
         await api.signUp(email, password);
@@ -67,6 +69,8 @@ export default function DashboardLayout({
       setUser(u as any);
     } catch (err: any) {
       setError(err.message || 'Auth failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -120,8 +124,12 @@ export default function DashboardLayout({
             </div>
             {error && <p className="text-sm" style={{ color: 'var(--signal-error)' }}>{error}</p>}
 
-            <button type="submit" className="btn btn-solid w-full">
-              {mode === 'login' ? 'Sign In' : 'Create Account'}
+            <button type="submit" className="btn btn-solid w-full" disabled={submitting}>
+              {submitting ? (
+                <span className="flex items-center justify-center gap-2"><Loader2 size={14} className="animate-spin" /> Signing In...</span>
+              ) : (
+                mode === 'login' ? 'Sign In' : 'Create Account'
+              )}
             </button>
 
             {/* Separator */}

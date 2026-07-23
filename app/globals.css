@@ -591,11 +591,14 @@ body {
 /* ── Form Inputs (visible against dark bg) ── */
 .site-input {
   background: var(--bg-surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-strong));
   color: var(--text-primary);
   border-radius: 2px;
   transition: border-color var(--dur-fast) var(--ease-standard),
               box-shadow var(--dur-fast) var(--ease-standard);
+}
+.site-input:hover {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border-strong));
 }
 .site-input:focus {
   border-color: var(--accent);

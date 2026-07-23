@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/supabase-browser';
 import Link from 'next/link';
-import { ArrowLeft, LogOut, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, LogOut, Loader2 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 export default function DashboardLayout({
@@ -11,24 +12,13 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
-
-  // OTP state
-  const [otpStep, setOtpStep] = useState<'idle' | 'sending' | 'input' | 'verifying' | 'done'>('idle');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [otpEmail, setOtpEmail] = useState('');
-  const [otpType, setOtpType] = useState<'signup' | 'password_change' | 'forgot_password'>('signup');
-  const [otpMsg, setOtpMsg] = useState('');
-  const [otpCooldown, setOtpCooldown] = useState(0);
-
-  // Change password state (OTP-gated)
-  const [pwNew, setPwNew] = useState('');
-  const [pwMsg, setPwMsg] = useState('');
 
   useEffect(() => {
     api.getUser().then(async (u: any) => {
@@ -57,22 +47,23 @@ export default function DashboardLayout({
     });
   }, []);
 
-  // OTP cooldown timer
-  useEffect(() => {
-    if (otpCooldown <= 0) return;
-    const t = setInterval(() => setOtpCooldown((c) => c - 1), 1000);
-    return () => clearInterval(t);
-  }, [otpCooldown]);
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
       if (mode === 'signup') {
         await api.signUp(email, password);
+        // Store email and navigate to OTP verify page
+        sessionStorage.setItem('otp-email', email);
+        sessionStorage.setItem('otp-type', 'signup');
+        router.push('/auth/verify?email=' + encodeURIComponent(email) + '&type=signup');
+        return;
       }
-      const userData = await api.signIn(email, password);
-      setUser(userData as any);
+      // Login
+      await api.signIn(email, password);
+      // Re-fetch user to update UI
+      const u = await api.getUser();
+      setUser(u as any);
     } catch (err: any) {
       setError(err.message || 'Auth failed');
     }
@@ -81,79 +72,6 @@ export default function DashboardLayout({
   const handleLogout = async () => {
     await api.signOut();
     setUser(null);
-  };
-
-  // ── OTP helpers ──
-  const startOtp = async (type: 'signup' | 'password_change' | 'forgot_password', targetEmail?: string) => {
-    const e = targetEmail || email;
-    if (!e) return;
-    setOtpStep('sending');
-    setOtpType(type);
-    setOtpEmail(e);
-    setOtpMsg('');
-    try {
-      await api.sendOtp(e, type);
-      setOtpStep('input');
-      setOtpCooldown(30);
-      setOtp(['', '', '', '', '', '']);
-    } catch (err: any) {
-      setOtpMsg(err.message || 'Failed to send OTP');
-      setOtpStep('idle');
-    }
-  };
-
-  const handleOtpDigit = (idx: number, val: string) => {
-    if (!/^\d?$/.test(val)) return;
-    const next = [...otp];
-    next[idx] = val;
-    setOtp(next);
-    // Auto-advance
-    if (val && idx < 5) {
-      const input = document.getElementById(`otp-${idx + 1}`);
-      input?.focus();
-    }
-  };
-
-  const handleOtpKeydown = (idx: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-      const input = document.getElementById(`otp-${idx - 1}`);
-      input?.focus();
-    }
-  };
-
-  const submitOtp = async () => {
-    const code = otp.join('');
-    if (code.length !== 6) { setOtpMsg('Enter the full 6-digit code'); return; }
-    setOtpStep('verifying');
-    setOtpMsg('');
-    try {
-      await api.verifyOtp(otpEmail, code, otpType);
-      setOtpStep('done');
-      if (otpType === 'password_change') {
-        // After OTP verified, allow password change
-        setPwMsg('OTP verified — you can now change your password');
-      }
-    } catch (err: any) {
-      setOtpMsg(err.message || 'Invalid OTP');
-      setOtpStep('input');
-    }
-  };
-
-  const resendOtp = () => {
-    if (otpCooldown > 0) return;
-    startOtp(otpType, otpEmail);
-  };
-
-  const confirmPasswordChange = async () => {
-    if (pwNew.length < 6) { setPwMsg('Password must be 6+ characters'); return; }
-    try {
-      await api.updatePassword(pwNew);
-      setPwMsg('Password updated successfully');
-      setPwNew('');
-      setOtpStep('idle');
-    } catch (err: any) {
-      setPwMsg(err.message || 'Failed to update password');
-    }
   };
 
   if (loading) {
@@ -174,8 +92,8 @@ export default function DashboardLayout({
           <h1 className="display-head mt-6 text-[length:var(--type-display-md)] leading-[var(--leading-display-md)]">
             Dashboard
           </h1>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">
-            Sign in to manage your portfolio content.
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            {mode === 'login' ? 'Sign in to manage your portfolio content.' : 'Create an account to get started.'}
           </p>
 
           <form onSubmit={handleAuth} className="mt-8 space-y-4">
@@ -199,22 +117,26 @@ export default function DashboardLayout({
                 required
               />
             </div>
-            {error && <p className="text-sm text-[var(--signal-error)]">{error}</p>}
+            {error && <p className="text-sm" style={{ color: 'var(--signal-error)' }}>{error}</p>}
+
             <button type="submit" className="btn btn-solid w-full">
               {mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
 
+            {/* Separator */}
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t" style={{ borderColor: 'var(--border-subtle)' }} />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 font-mono text-[0.55rem] uppercase tracking-widest" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+                <span className="px-2 font-mono text-[0.55rem] uppercase tracking-widest"
+                      style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
                   Or continue with
                 </span>
               </div>
             </div>
 
+            {/* GitHub OAuth */}
             <button
               type="button"
               onClick={() => api.signInWithGithub()}
@@ -226,128 +148,34 @@ export default function DashboardLayout({
               Sign in with GitHub
             </button>
 
+            {/* Forgot password — themed hover */}
             {mode === 'login' && (
               <button
                 type="button"
-                onClick={() => startOtp('forgot_password')}
-                className="w-full text-center text-[0.55rem] font-mono uppercase tracking-widest hover:text-[var(--accent)]"
+                onClick={() => {
+                  if (!email) { setError('Enter your email first'); return; }
+                  sessionStorage.setItem('otp-email', email);
+                  sessionStorage.setItem('otp-type', 'forgot_password');
+                  router.push('/auth/verify?email=' + encodeURIComponent(email) + '&type=forgot_password');
+                }}
+                className="w-full text-center text-[0.55rem] font-mono uppercase tracking-widest transition-colors duration-150 hover:text-[var(--accent)]"
                 style={{ color: 'var(--text-muted)' }}
               >
                 Forgot password?
               </button>
             )}
 
+            {/* Mode toggle — themed hover */}
             <button
               type="button"
               onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); }}
-              className="w-full text-center text-[0.6rem] font-mono uppercase tracking-widest"
+              className="w-full text-center text-[0.6rem] font-mono uppercase tracking-widest transition-colors duration-150 hover:text-[var(--accent)]"
               style={{ color: 'var(--text-primary)', cursor: 'pointer' }}
             >
               {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
           </form>
-
-          {/* Signup OTP prompt */}
-          {mode === 'signup' && (
-            <div className="mt-6 rounded-sm border p-4" style={{ borderColor: 'var(--border-subtle)' }}>
-              <p className="mono-label text-[0.55rem] mb-2">Step 2: Verify your email</p>
-              <button
-                type="button"
-                onClick={() => startOtp('signup', email)}
-                disabled={!email}
-                className="btn btn-solid w-full text-[0.65rem]"
-              >
-                {otpStep === 'sending' ? 'Sending...' : 'Send Verification Code'}
-              </button>
-            </div>
-          )}
         </div>
-
-        {/* Global OTP Modal */}
-        {(otpStep === 'input' || otpStep === 'verifying') && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
-            <div className="w-full max-w-sm rounded-sm border p-6" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-base)' }}>
-              <h3 className="text-sm font-semibold">
-                {otpType === 'signup' ? 'Verify Email' :
-                 otpType === 'password_change' ? 'Change Password' : 'Reset Password'}
-              </h3>
-              <p className="mt-2 text-[0.65rem]" style={{ color: 'var(--text-muted)' }}>
-                Enter the 6-digit code sent to <strong style={{ color: 'var(--text-primary)' }}>{otpEmail}</strong>
-              </p>
-
-              {otpStep === 'input' && (
-                <>
-                  <div className="mt-5 flex justify-center gap-2">
-                    {otp.map((d, i) => (
-                      <input
-                        key={i}
-                        id={`otp-${i}`}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={d}
-                        onChange={(e) => handleOtpDigit(i, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeydown(i, e)}
-                        className="site-input h-10 w-10 text-center text-sm font-mono"
-                        autoFocus={i === 0}
-                      />
-                    ))}
-                  </div>
-
-                  {otpMsg && (
-                    <p className={`mt-3 text-center text-[0.6rem] ${otpMsg.includes('Invalid') || otpMsg.includes('Failed') ? 'text-[var(--signal-error)]' : 'text-[var(--accent)]'}`}>
-                      {otpMsg}
-                    </p>
-                  )}
-
-                  <button onClick={submitOtp} className="btn btn-solid mt-5 w-full text-[0.65rem]">
-                    Verify Code
-                  </button>
-
-                  <div className="mt-3 text-center">
-                    <button
-                      onClick={resendOtp}
-                      disabled={otpCooldown > 0}
-                      className="text-[0.55rem] font-mono uppercase tracking-widest hover:text-[var(--accent)] disabled:opacity-40"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : 'Resend code'}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {otpStep === 'verifying' && (
-                <div className="flex justify-center py-6">
-                  <Loader2 size={20} className="animate-spin" style={{ color: 'var(--accent)' }} />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* OTP Done Modal */}
-        {otpStep === 'done' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
-            <div className="w-full max-w-sm rounded-sm border p-6 text-center" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-base)' }}>
-              <CheckCircle size={32} className="mx-auto" style={{ color: 'var(--accent)' }} />
-              <h3 className="mt-3 text-sm font-semibold">
-                {otpType === 'signup' ? 'Email Verified' : 'Identity Confirmed'}
-              </h3>
-              <p className="mt-2 text-[0.6rem]" style={{ color: 'var(--text-muted)' }}>
-                {otpType === 'signup' ? 'Your email has been verified. You can now sign in.' :
-                 otpType === 'password_change' ? 'Identity confirmed. Enter your new password below.' :
-                 'Identity confirmed. Enter your new password below.'}
-              </p>
-              <button
-                onClick={() => setOtpStep('idle')}
-                className="btn btn-ghost mt-4 text-[0.65rem]"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -367,47 +195,12 @@ export default function DashboardLayout({
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[0.6rem] text-[var(--text-muted)]">{user.email}</span>
+          <span className="font-mono text-[0.6rem]" style={{ color: 'var(--text-muted)' }}>{user.email}</span>
           <button onClick={handleLogout} className="nav-icon-btn">
             <LogOut size={14} />
           </button>
         </div>
       </header>
-
-      {/* OTP-gated password change section (shown on all dashboard pages via layout) */}
-      {otpStep !== 'idle' && (
-        <div className="mx-auto max-w-5xl px-6 pt-4">
-          <div className="rounded-sm border p-4" style={{ borderColor: 'var(--border-subtle)' }}>
-            {otpStep === 'done' && otpType === 'password_change' ? (
-              <div className="flex flex-col gap-3">
-                <p className="text-[0.6rem] font-mono uppercase tracking-widest text-[var(--accent)]">
-                  ✓ Verified — enter new password
-                </p>
-                <div className="flex gap-3">
-                  <input
-                    type="password"
-                    value={pwNew}
-                    onChange={(e) => setPwNew(e.target.value)}
-                    placeholder="New password (6+ chars)"
-                    className="site-input flex-1 px-3 py-2 text-sm"
-                  />
-                  <button onClick={confirmPasswordChange} className="btn btn-solid text-[0.65rem]">
-                    Update Password
-                  </button>
-                </div>
-                {pwMsg && <p className={`text-[0.6rem] ${pwMsg.includes('successfully') ? 'text-[var(--accent)]' : 'text-[var(--signal-error)]'}`}>{pwMsg}</p>}
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <p className="text-[0.6rem]" style={{ color: 'var(--text-muted)' }}>
-                  {otpStep === 'sending' ? 'Sending OTP...' : 'Waiting for OTP verification...'}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className="mx-auto max-w-5xl px-6 py-8">{children}</div>
     </div>
   );

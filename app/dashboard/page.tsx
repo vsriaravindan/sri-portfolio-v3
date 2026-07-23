@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, ExternalLink, FileText, Settings, KeyRound } from 'lucide-react';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,14 +58,9 @@ export default function DashboardPage() {
 
   const handlePasswordChange = async () => {
     if (!userEmail) return;
-    try {
-      await api.sendOtp(userEmail, 'password_change');
-      // Show OTP modal — the layout handles OTP input
-      // The user can now enter OTP in the layout's modal
-      setPwMsg('Verification code sent to your email');
-    } catch (err: any) {
-      setPwMsg(err.message || 'Failed to send OTP');
-    }
+    sessionStorage.setItem('otp-email', userEmail);
+    sessionStorage.setItem('otp-type', 'password_change');
+    router.push('/auth/verify?email=' + encodeURIComponent(userEmail) + '&type=password_change');
   };
 
   const handlePasswordChangeDirect = async () => {
@@ -123,7 +120,7 @@ export default function DashboardPage() {
           <KeyRound size={18} className="text-[var(--accent)]" />
           <div>
             <p className="text-sm font-medium">Change Password</p>
-            <p className="text-[0.65rem] text-[var(--text-muted)]">Send reset link to email</p>
+            <p className="text-[0.65rem] text-[var(--text-muted)]">Verify via OTP to change password</p>
           </div>
         </button>
       </div>
@@ -132,11 +129,9 @@ export default function DashboardPage() {
       {pwOpen && (
         <div className="mb-8 rounded-sm border p-4" style={{ borderColor: 'var(--border-subtle)' }}>
           <p className="mono-label text-[0.55rem]">Verify via OTP to change your password</p>
-          <div className="mt-3 flex items-end gap-3">
           <button onClick={handlePasswordChange} className="btn btn-solid text-[0.65rem]">
-            Send OTP Code
+          Send OTP Code
           </button>
-          </div>
           {pwMsg && <p className="mt-2 text-sm" style={{ color: pwMsg.includes('sent') ? 'var(--accent)' : 'var(--signal-error)' }}>{pwMsg}</p>}
         </div>
       )}

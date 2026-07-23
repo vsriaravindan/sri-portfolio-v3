@@ -255,6 +255,7 @@ body {
 .btn-solid:hover {
   background: color-mix(in srgb, var(--accent) 84%, var(--ink));
   border-color: color-mix(in srgb, var(--accent) 84%, var(--ink));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .btn-ghost {

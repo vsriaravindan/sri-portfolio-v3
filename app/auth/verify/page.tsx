@@ -100,9 +100,9 @@ function VerifyForm() {
         <div className="mt-8">
           <Mail size={28} className="text-[var(--accent)]" />
           <h1 className="display-head mt-4 text-[length:var(--type-display-md)] leading-[var(--leading-display-md)]">
-            {type === 'signup' ? 'Verify Your <em>Email</em>' :
-             type === 'password_change' ? 'Confirm Password <em>Change</em>' :
-             'Reset Your <em>Password</em>'}
+            {type === 'signup' ? <>Verify Your <em>Email</em></> :
+             type === 'password_change' ? <>Confirm Password <em>Change</em></> :
+             <>Reset Your <em>Password</em></>}
           </h1>
           <p className="mt-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
             A 6-digit code was sent to <strong style={{ color: 'var(--text-primary)' }}>{email}</strong>
@@ -130,7 +130,7 @@ function VerifyForm() {
             <div className="mt-4 text-center">
               <button onClick={sendOtpCode} disabled={cooldown > 0}
                 className="w-full text-center text-[0.55rem] font-mono uppercase tracking-widest hover:text-[var(--accent)] disabled:opacity-40"
-                style={{ color: 'var(--text-muted)' }}>
+                style={{ color: 'var(--text-primary)' }}>
                 {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
               </button>
             </div>

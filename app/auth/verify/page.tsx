@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/supabase-browser';
 import { Loader2, CheckCircle, ArrowLeft, Mail } from 'lucide-react';
 
-export default function VerifyPage() {
+function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -17,17 +17,11 @@ export default function VerifyPage() {
   const [step, setStep] = useState<'sending' | 'input' | 'verifying' | 'done'>('sending');
   const [msg, setMsg] = useState('');
   const [cooldown, setCooldown] = useState(0);
-
-  // Password change state (shown after OTP verification)
   const [pwNew, setPwNew] = useState('');
   const [pwMsg, setPwMsg] = useState('');
 
   useEffect(() => {
-    if (!email) {
-      router.push('/dashboard');
-      return;
-    }
-    // Auto-send OTP on page load
+    if (!email) { router.push('/dashboard'); return; }
     sendOtpCode();
   }, []);
 
@@ -55,19 +49,12 @@ export default function VerifyPage() {
     const next = [...otp];
     next[idx] = val;
     setOtp(next);
-    if (val && idx < 5) {
-      document.getElementById(`otp-${idx + 1}`)?.focus();
-    }
-    // Auto-submit when all 6 digits entered
-    if (val && idx === 5) {
-      setTimeout(() => submitOtp([...next.slice(0, 5), val].join('')), 200);
-    }
+    if (val && idx < 5) document.getElementById(`otp-${idx + 1}`)?.focus();
+    if (val && idx === 5) setTimeout(() => submitOtp([...next.slice(0, 5), val].join('')), 200);
   };
 
   const handleKeydown = (idx: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-      document.getElementById(`otp-${idx - 1}`)?.focus();
-    }
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0) document.getElementById(`otp-${idx - 1}`)?.focus();
   };
 
   const submitOtp = async (code?: string) => {
@@ -77,13 +64,9 @@ export default function VerifyPage() {
     setMsg('');
     try {
       await api.verifyOtp(email, finalCode, type);
-
       if (type === 'password_change' || type === 'forgot_password') {
-        // Show password change form
         setStep('done');
-        setMsg('Identity confirmed. Enter your new password below.');
       } else {
-        // signup — redirect to dashboard
         sessionStorage.removeItem('otp-email');
         sessionStorage.removeItem('otp-type');
         router.push('/dashboard');
@@ -114,7 +97,6 @@ export default function VerifyPage() {
         <Link href="/dashboard" className="mono-label inline-flex items-center gap-2 hover:text-[var(--accent)]">
           <ArrowLeft size={14} /> Back
         </Link>
-
         <div className="mt-8">
           <Mail size={28} className="text-[var(--accent)]" />
           <h1 className="display-head mt-4 text-[length:var(--type-display-md)] leading-[var(--leading-display-md)]">
@@ -127,51 +109,28 @@ export default function VerifyPage() {
           </p>
         </div>
 
-        {/* OTP Input */}
         {step === 'sending' && (
-          <div className="flex justify-center py-10">
-            <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
-          </div>
+          <div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} /></div>
         )}
 
         {step === 'input' && (
           <div className="mt-8">
             <div className="flex justify-center gap-2">
               {otp.map((d, i) => (
-                <input
-                  key={i}
-                  id={`otp-${i}`}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={d}
-                  onChange={(e) => handleDigit(i, e.target.value)}
-                  onKeyDown={(e) => handleKeydown(i, e)}
-                  className="site-input h-12 w-12 text-center text-lg font-mono"
-                  autoFocus={i === 0}
-                  style={{ fontSize: '1.1rem' }}
-                />
+                <input key={i} id={`otp-${i}`} type="text" inputMode="numeric" maxLength={1} value={d}
+                  onChange={(e) => handleDigit(i, e.target.value)} onKeyDown={(e) => handleKeydown(i, e)}
+                  className="site-input h-12 w-12 text-center text-lg font-mono" autoFocus={i === 0} style={{ fontSize: '1.1rem' }} />
               ))}
             </div>
-
             {msg && (
               <p className={`mt-4 text-center text-sm ${msg.includes('Invalid') || msg.includes('Failed') ? 'text-[var(--signal-error)]' : ''}`}
-                 style={{ color: msg.includes('Invalid') || msg.includes('Failed') ? 'var(--signal-error)' : 'var(--accent)' }}>
-                {msg}
-              </p>
+                 style={{ color: msg.includes('Invalid') || msg.includes('Failed') ? 'var(--signal-error)' : 'var(--accent)' }}>{msg}</p>
             )}
-
-            <button onClick={() => submitOtp()} className="btn btn-solid mt-6 w-full">
-              Verify Code
-            </button>
-
+            <button onClick={() => submitOtp()} className="btn btn-solid mt-6 w-full">Verify Code</button>
             <div className="mt-4 text-center">
-              <button
-                onClick={sendOtpCode}
-                disabled={cooldown > 0}
+              <button onClick={sendOtpCode} disabled={cooldown > 0}
                 className="w-full text-center text-[0.55rem] font-mono uppercase tracking-widest hover:text-[var(--accent)] disabled:opacity-40"
-                style={{ color: 'var(--text-muted)' }}
-              >
+                style={{ color: 'var(--text-muted)' }}>
                 {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
               </button>
             </div>
@@ -179,52 +138,42 @@ export default function VerifyPage() {
         )}
 
         {step === 'verifying' && (
-          <div className="flex justify-center py-10">
-            <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
-          </div>
+          <div className="flex justify-center py-10"><Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} /></div>
         )}
 
-        {/* Post-OTP: Password change form */}
         {step === 'done' && (type === 'password_change' || type === 'forgot_password') && (
           <div className="mt-8 rounded-sm border p-5" style={{ borderColor: 'var(--border-subtle)' }}>
             <CheckCircle size={24} className="text-[var(--accent)]" />
-            <p className="mt-2 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-              Identity Confirmed
-            </p>
-            <p className="mt-1 text-[0.65rem]" style={{ color: 'var(--text-muted)' }}>
-              Enter your new password below.
-            </p>
-
+            <p className="mt-2 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Identity Confirmed</p>
+            <p className="mt-1 text-[0.65rem]" style={{ color: 'var(--text-muted)' }}>Enter your new password below.</p>
             <div className="mt-5 space-y-3">
-              <input
-                type="password"
-                value={pwNew}
-                onChange={(e) => setPwNew(e.target.value)}
-                placeholder="New password (6+ characters)"
-                className="site-input w-full px-3 py-2 text-sm"
-              />
-              {pwMsg && (
-                <p className={`text-sm ${pwMsg.includes('success') ? 'text-[var(--accent)]' : 'text-[var(--signal-error)]'}`}>
-                  {pwMsg}
-                </p>
-              )}
-              <button onClick={handlePasswordChange} className="btn btn-solid w-full">
-                Update Password
-              </button>
+              <input type="password" value={pwNew} onChange={(e) => setPwNew(e.target.value)}
+                placeholder="New password (6+ characters)" className="site-input w-full px-3 py-2 text-sm" />
+              {pwMsg && <p className={`text-sm ${pwMsg.includes('success') ? 'text-[var(--accent)]' : 'text-[var(--signal-error)]'}`}>{pwMsg}</p>}
+              <button onClick={handlePasswordChange} className="btn btn-solid w-full">Update Password</button>
             </div>
           </div>
         )}
 
-        {/* Post-OTP: Signup success */}
         {step === 'done' && type === 'signup' && (
           <div className="mt-8 text-center">
             <CheckCircle size={40} className="mx-auto" style={{ color: 'var(--accent)' }} />
-            <p className="mt-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Redirecting to dashboard...
-            </p>
+            <p className="mt-3 text-sm" style={{ color: 'var(--text-secondary)' }}>Redirecting to dashboard...</p>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+        <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
+      </div>
+    }>
+      <VerifyForm />
+    </Suspense>
   );
 }

@@ -35,14 +35,13 @@ interface ContainerHealth {
   status: string;
   health: string;
   ports: string;
-  uptime: string;
-  type: 'docker' | 'pm2';
 }
 
 export default function DevOpsPage() {
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [health, setHealth] = useState<HealthData | null>(null);
+  const [infra, setInfra] = useState<{containers: ContainerHealth[], pm2: {running: number, processes: any[]}} | null>(null);
   const [loading, setLoading] = useState(true);
 
   const GITHUB_REPO = 'vsriaravindan/sri-portfolio-v3';
@@ -51,9 +50,10 @@ export default function DevOpsPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [runsRes, healthRes] = await Promise.all([
+        const [runsRes, healthRes, infraRes] = await Promise.all([
           fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/runs?per_page=10&status=completed`),
           fetch('/api/health'),
+          fetch('/api/infra'),
         ]);
         if (runsRes.ok) {
           const data = await runsRes.json();
@@ -61,6 +61,9 @@ export default function DevOpsPage() {
         }
         if (healthRes.ok) {
           setHealth(await healthRes.json());
+        }
+        if (infraRes.ok) {
+          setInfra(await infraRes.json());
         }
       } catch (e) {
         console.error('Failed to fetch DevOps data', e);
@@ -286,6 +289,39 @@ export default function DevOpsPage() {
         </section>
       </div>
 
+      {/* Container Health + PM2 Status */}
+      <div className="mt-8 grid gap-8 md:grid-cols-2">
+        <section className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-5">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Containers
+          </h2>
+          {infra?.containers?.length ? infra.containers.map((c, i) => (
+            <div key={i} className="mb-2 last:mb-0 flex items-center gap-3 rounded-lg bg-[var(--bg-base)] px-3 py-2 text-xs">
+              <span className={`inline-block h-2 w-2 rounded-full ${c.health === 'healthy' ? 'bg-green-400' : c.health === 'starting' ? 'bg-yellow-400' : 'bg-red-400'}`} />
+              <span className="font-medium text-[var(--text-primary)]">{c.name}</span>
+              <span className="text-[var(--text-muted)]">{c.health} · {c.status.split('(')[0].trim()}</span>
+            </div>
+          )) : (
+            <p className="text-xs text-[var(--text-muted)]">Waiting for status...</p>
+          )}
+        </section>
+
+        <section className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-5">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            PM2 Processes
+          </h2>
+          {infra?.pm2?.processes?.length ? infra.pm2.processes.map((p, i) => (
+            <div key={i} className="mb-2 last:mb-0 flex items-center gap-3 rounded-lg bg-[var(--bg-base)] px-3 py-2 text-xs">
+              <span className={`inline-block h-2 w-2 rounded-full ${p.status === 'online' ? 'bg-green-400' : 'bg-red-400'}`} />
+              <span className="font-medium text-[var(--text-primary)]">{p.name}</span>
+              <span className="text-[var(--text-muted)]">{p.status} · {p.memory}</span>
+            </div>
+          )) : (
+            <p className="text-xs text-[var(--text-muted)]">Waiting for status...</p>
+          )}
+        </section>
+      </div>
+
       {/* Tech Stack Footer */}
       <section className="mt-12 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-6">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
@@ -302,7 +338,8 @@ export default function DevOpsPage() {
           ))}
         </div>
         <p className="mt-4 text-xs text-[var(--text-muted)]">
-          This dashboard updates live from GitHub Actions API and the server's health endpoint.
+          This dashboard updates live from GitHub Actions API, the server's health endpoint, and the{" "}
+          <a href="/api/infra" target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">infra status API</a>.
           Total infrastructure cost: <strong className="text-green-400">$10.14/yr</strong> (domain only).
         </p>
       </section>

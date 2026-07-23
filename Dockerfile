@@ -52,6 +52,6 @@ USER nextjs
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/',r=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"
+    CMD node -e "var h=require('os').hostname();require('http').get('http://'+h+':3000/',function(r){process.exit(r.statusCode===200?0:1)}).on('error',function(){process.exit(1)})"
 
 CMD ["node", "server.js"]

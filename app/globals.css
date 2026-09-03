@@ -635,6 +635,18 @@ body {
   50% { opacity: 0; }
 }
 
+/* Lead card glow — projects listing page hero card */
+.lead-card__glow {
+  background:
+    radial-gradient(80% 100% at 0% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%),
+    radial-gradient(60% 80% at 100% 100%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%);
+  transition: transform 600ms var(--ease-standard);
+}
+
+.card-line-interactive:hover .lead-card__glow {
+  transform: scale(1.04);
+}
+
 .cmd-overlay {
   z-index: 100;
   background: color-mix(in srgb, var(--ink) 32%, transparent);

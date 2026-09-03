@@ -29,42 +29,123 @@ const fallbackAbout = {
   heading: { line1: "Cloud Automation", line2: "AI-Augmented" },
 };
 
+// ── 6-project fallback (covers all projects shown across home + /projects) ──
 const fallbackProjects: Project[] = [
   {
-    slug: "ecommerce",
-    name: "Sri-Ecommerce — Live Production Platform",
-    role: "Lead Developer & Cloud Infrastructure Architect",
-    description: "A fully functional, production-grade e-commerce web application featuring secure user authentication, dynamic product catalogs, real-time shopping cart, order processing, and an admin dashboard for inventory management.",
-    details: "Provisioned and secured the production VPS environment from scratch. Configured Nginx reverse proxy for concurrent traffic with static asset caching.",
-    techStack: ["Express.js", "React", "PostgreSQL", "Nginx", "Docker", "PM2", "Let's Encrypt"],
-    repo: "https://github.com/vsriaravindan/sri-ecommerce",
-    liveUrl: "http://140.245.203.57/",
+    slug: "ledgercalc",
+    name: "LedgerCalc — Dual App, Real-Time Sync",
+    role: "Android Developer & Backend Integrator",
+    description:
+      "Dual-mode Android finance app: Ledger + CalcHub (33 calculators). Share a ledger via 6-digit secret code, watch entries sync live over Supabase WebSockets.",
+    details:
+      "Built natively in Kotlin + Jetpack Compose with a glass-morphism Material3 design language. Local persistence is Room v3 with three migrations; remote sync uses Supabase Postgres + Phoenix Channels WebSockets for instant propagation.",
+    techStack: ["Kotlin 2.2", "Jetpack Compose", "Material3", "Room v3", "Supabase", "Phoenix Channels", "WebSocket", "OkHttp", "AGP 9.2"],
+    repo: "https://github.com/vsriaravindan/ledgercalc",
     featured: true,
+    standout:
+      "Real-time WebSocket sync + 6-digit secret-code sharing + history auto-save without pressing = + 33 financial calculators.",
+    category: "Android",
     highlights: [
-      "Provisioned and hardened production VPS from bare metal",
-      "Configured Nginx reverse proxy with caching headers",
-      "Automated daily database backups with cron",
+      "Real-time WebSocket sync via Supabase Phoenix Channels",
+      "6-digit secret-code folder sharing",
+      "Calculator history auto-saves without pressing =",
+      "Audit trail with actor badges",
+      "33 financial calculators",
+      "Room v3 with three migrations",
     ],
   },
   {
-    slug: "ledgercalc",
-    name: "LedgerCalc — AI-Powered Finance Calculator",
-    role: "Developer & DevOps Engineer",
-    description: "An Android finance calculator that utilizes Google's Gemini AI for intelligent ledger accounting and smart financial insights.",
-    details: "Built natively for Android using Kotlin and Android Studio. Integrated Google Gemini AI API for intelligent financial analysis.",
-    techStack: ["Kotlin", "Android Studio", "Gemini API", "Git", "GitHub Actions"],
-    repo: "https://github.com/vsriaravindan/ledgercalc",
+    slug: "ecommerce",
+    name: "Sri-Kart — Live E-Commerce on Oracle Cloud",
+    role: "Lead Developer & Cloud Infrastructure Architect",
+    description:
+      "Production-grade e-commerce platform running live on Oracle Cloud VPS — Express + React + PostgreSQL behind Nginx + PM2 + Docker, with a custom premium design system.",
+    details:
+      "Provisioned and secured the production Oracle Cloud VPS environment from scratch. Configured Nginx reverse proxy, Let's Encrypt SSL/TLS, PM2, and Docker.",
+    techStack: ["React", "Vite", "Express.js", "PostgreSQL", "Prisma", "Nginx", "Docker", "PM2", "Let's Encrypt"],
+    repo: "https://github.com/vsriaravindan/sri-ecommerce",
+    liveUrl: "http://140.245.203.57/",
     featured: true,
+    standout:
+      "DevOps from bare metal + custom design system + full-stack app shipping real traffic.",
+    category: "Web",
     highlights: [
-      "Integrated Google Gemini AI for intelligent accounting",
-      "Secure API key management in Android builds",
-      "Version-controlled CI pipeline configuration",
+      "Provisioned Oracle Cloud VPS from bare metal",
+      "Nginx reverse proxy with static asset caching",
+      "Daily database backups via cron",
+      "Let's Encrypt SSL/TLS with auto-renewal",
+      "UFW firewall + secret isolation",
+      "Custom design system (DESIGN.md)",
+    ],
+  },
+  {
+    slug: "sriboard",
+    name: "SriBoard — Privacy-First AI Keyboard",
+    role: "Android Developer (Fork Maintainer)",
+    description:
+      "Privacy-first Android keyboard forked from HeliBoard, with inline AI text correction and translation via 5 AI providers — works inside any app without Accessibility Service.",
+    details:
+      "Built on HeliBoard lineage. AI toolbar as a first-class keyboard action. Supports 5 AI providers with user-owned API keys. No INTERNET permission by default.",
+    techStack: ["Kotlin", "Android Views", "KeyboardView", "OkHttp", "Gemini API", "Grok API", "DeepSeek API", "Gradle"],
+    repo: "https://github.com/vsriaravindan/SriBoard",
+    featured: false,
+    standout:
+      "Inline AI inside the keyboard (no Accessibility Service), BYOK for 5 providers, no INTERNET permission by default.",
+    category: "Android",
+    highlights: [
+      "5 AI providers: Gemini, Grok, DeepSeek, OpenAI-compat",
+      "Inline AI in any input field — no Accessibility Service",
+      "No INTERNET permission by default",
+      "v2.3 iterative shipping",
+      "Custom AI toolbar with 7 presets",
+    ],
+  },
+  {
+    slug: "netswitch",
+    name: "NetSwitch — Zero-Permission Network Mode Toggle",
+    role: "Android Developer (Side Project)",
+    description:
+      "One-tap Android QS tile + widget deep-link that flips SIM network mode on Realme devices — zero permissions declared.",
+    details:
+      "On Realme GT Neo 3 (ColorOS 13), every standard permission grant route is blocked. Solved with CLEAR_TASK deep-link. Zero permissions declared.",
+    techStack: ["Kotlin", "TileService", "AppWidgetProvider", "Gradle"],
+    repo: "https://github.com/vsriaravindan/netswitch",
+    featured: false,
+    standout:
+      "Zero-permission deep-link to SIM network settings — works on ColorOS where pm grant is blocked.",
+    category: "Android",
+    highlights: [
+      "TileService API",
+      "AppWidgetProvider",
+      "CLEAR_TASK deep-link to Settings$MobileNetworkActivity",
+      "Zero permissions declared",
+    ],
+  },
+  {
+    slug: "bankchain",
+    name: "BankChain — Modular DeFi Suite on Polygon",
+    role: "Blockchain Developer",
+    description:
+      "Modular DeFi banking suite on Polygon — Lending, Token, Treasury, Vault contracts backed by an autonomous AI agent.",
+    details:
+      "Four Solidity contracts + AI-agent module. Express + Prisma backend indexes events. Hardhat 9.x, Polygon Amoy.",
+    techStack: ["Solidity 0.8.20", "Hardhat", "OpenZeppelin", "TypeScript", "Express", "Prisma", "Polygon", "Ethers v6"],
+    repo: "https://github.com/vsriaravindan/bankchain",
+    featured: false,
+    standout:
+      "Four production-grade Solidity contracts + AI-agent layer for on-chain monitoring.",
+    category: "Blockchain",
+    highlights: [
+      "4 contracts: Lending, Token, Treasury, Vault",
+      "Hardhat + Solidity 0.8.20 + OpenZeppelin",
+      "Autonomous AI agent",
+      "Express + Prisma backend",
+      "Polygon Amoy deployment",
     ],
   },
 ];
 
 export default async function Home() {
-  // ── Fetch from Supabase ──────────────────────────────────────────────
   const [aboutRes, skillsRes, projectsRes, latestPostsRes] = await Promise.all([
     supabase.from('site_content').select('content').eq('section', 'about').maybeSingle(),
     supabase.from('site_content').select('content').eq('section', 'skills').maybeSingle(),
@@ -78,7 +159,8 @@ export default async function Home() {
   const about = aboutRes?.data?.content ?? fallbackAbout;
   const skills = skillsRes?.data?.content ?? { categories: fallbackSkills };
   const projects = projectsRes?.data?.content ?? { projects: fallbackProjects };
-  const featured = projects.projects.filter((p: Project) => p.featured);
+  // Show ALL projects on home (was previously featured-only = 2)
+  const allProjects = projects.projects as Project[];
   const skillCategories = skills.categories ?? fallbackSkills;
   const latestPosts = latestPostsRes?.data ?? [];
 
@@ -125,27 +207,28 @@ export default async function Home() {
         </section>
       </ScrollReveal>
 
-      {/* Featured Projects */}
+      {/* Projects — all of them, in a compact rail */}
       <ScrollReveal delay={200}>
         <section className="mx-auto max-w-6xl px-6 pb-24 sm:px-10 sm:pb-28">
-          <p className="mono-label" style={{ color: 'var(--accent)' }}>Selected Projects</p>
-
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            {featured.map((project: Project) => (
-              <ScrollReveal key={project.slug}>
-                <ProjectCard project={project} />
-              </ScrollReveal>
-            ))}
-          </div>
-
-          <div className="mt-8 flex justify-end">
+          <div className="flex items-baseline justify-between">
+            <p className="mono-label" style={{ color: 'var(--accent)' }}>
+              {allProjects.length} Projects Shipped
+            </p>
             <Link
-              href="/work"
+              href="/projects"
               className="font-mono text-xs hover:underline"
               style={{ color: 'var(--accent)' }}
             >
-              View all work &rarr;
+              View all &rarr;
             </Link>
+          </div>
+
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {allProjects.map((project: Project, idx: number) => (
+              <ScrollReveal key={project.slug} delay={idx * 60}>
+                <ProjectCard project={project} />
+              </ScrollReveal>
+            ))}
           </div>
         </section>
       </ScrollReveal>

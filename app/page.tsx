@@ -32,6 +32,30 @@ const fallbackAbout = {
 // ── 6-project fallback (covers all projects shown across home + /projects) ──
 const fallbackProjects: Project[] = [
   {
+    slug: "devops-academy",
+    name: "DevOps Academy — Interactive DevOps SaaS",
+    role: "Full-Stack Developer & Product Engineer",
+    description:
+      "A monetized SaaS that teaches DevOps interactively — 14 modules / 95 lessons, a terminal-lab CLI that grades real commands, notes with Obsidian sync, and an AI teacher that remembers each user's progress.",
+    details:
+      "Built on Next.js 16 + Supabase + Vercel AI SDK with DeepSeek V4 Flash. Every chat turn builds a context bundle (teacher rules + progress + current lesson + last 20 messages) injected as system prompt — so 'Continue' always resumes where the user left off. Terminal labs use devops-lab CLI companion with real command grading. Monetized via Razorpay (3 tiers, Stripe-ready).",
+    techStack: ["Next.js 16", "React 19", "Supabase", "Vercel AI SDK", "DeepSeek V4 Flash", "Razorpay", "Node.js CLI", "Tailwind v4"],
+    repo: "https://github.com/vsriaravindan/devops-academy",
+    liveUrl: "https://devops-academy-nu.vercel.app/",
+    featured: true,
+    standout:
+      "Continuity engine — AI teacher resumes exactly where the user left off. Plus real terminal-lab grading, Obsidian notes sync, and 3-tier Razorpay monetization from day one.",
+    category: "Web",
+    highlights: [
+      "Continuity engine: AI teacher resumes exactly where the user left off",
+      "14 modules / 95 lessons, full curriculum",
+      "Terminal labs via devops-lab CLI with real command grading",
+      "Notes + Obsidian sync (Pro feature)",
+      "Razorpay 3-tier pricing, monetized from day one",
+      "Admin panel: live pricing/model/teacher-rules edits",
+    ],
+  },
+  {
     slug: "ledgercalc",
     name: "LedgerCalc — Dual App, Real-Time Sync",
     role: "Android Developer & Backend Integrator",

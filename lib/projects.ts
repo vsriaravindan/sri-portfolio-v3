@@ -14,9 +14,51 @@ export type Project = {
 };
 
 // ── Source of truth: each repo's SHOWCASE.md ──────────────────────────────
-// (LedgerCalc, SriBoard, NetSwitch, Sri-Kart, BankChain)
+// (LedgerCalc, SriBoard, NetSwitch, Sri-Kart, BankChain, DevOps Academy)
 export const projects: Project[] = [
-  // ── Lead / Hero ───────────────────────────────────────────────────────
+  // ── Flagship Lead ─────────────────────────────────────────────────────
+  {
+    slug: "devops-academy",
+    name: "DevOps Academy — Interactive DevOps SaaS",
+    role: "Full-Stack Developer & Product Engineer",
+    description:
+      "A monetized SaaS that teaches DevOps interactively — 14 modules / 95 lessons, a terminal-lab CLI companion that grades real commands, notes with Obsidian sync, and an AI teacher that remembers each user's progress.",
+    details:
+      "Built on Next.js 16 + Supabase + Vercel AI SDK with DeepSeek V4 Flash as the AI teacher. Every chat turn builds a context bundle (teacher rules + progress snapshot + current lesson + last 20 messages) injected as system prompt — so 'Continue' always resumes exactly where the user left off. Terminal labs use a companion devops-lab CLI that runs real Linux commands locally and the server re-verifies command + output evidence before awarding XP. Notes are markdown per user with Obsidian sync (Pro-only export). Monetized via Razorpay with a Stripe-ready provider abstraction: Free ₹0, Starter ₹199/mo / ₹1,999/yr, Pro ₹499/mo / ₹4,999/yr.",
+    techStack: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind v4",
+      "Supabase",
+      "Postgres",
+      "RLS",
+      "pgsodium Vault",
+      "Vercel AI SDK",
+      "DeepSeek V4 Flash",
+      "Razorpay",
+      "Node.js CLI",
+      "Vitest",
+    ],
+    repo: "https://github.com/vsriaravindan/devops-academy",
+    liveUrl: "https://devops-academy-nu.vercel.app/",
+    featured: true,
+    standout:
+      "Continuity engine — AI teacher resumes exactly where the user left off. Plus real terminal-lab grading via devops-lab CLI, Obsidian notes sync, and 3-tier Razorpay monetization from day one.",
+    category: "Web",
+    highlights: [
+      "Continuity engine: AI teacher resumes exactly where the user left off",
+      "14 modules / 95 lessons, full curriculum seeded",
+      "Terminal labs with real command grading via devops-lab CLI",
+      "Notes notebook + Obsidian sync (Pro feature)",
+      "Monetized from day one (Razorpay, 3 tiers, Stripe-ready)",
+      "Per-user chat sessions with RLS, auto-titled",
+      "DeepSeek V4 Flash AI teacher, platform key only",
+      "Admin panel: edit pricing/model/teacher-rules live",
+    ],
+  },
+
+  // ── Featured Deep Dives ───────────────────────────────────────────────
   {
     slug: "ledgercalc",
     name: "LedgerCalc — Dual App, Real-Time Sync",

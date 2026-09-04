@@ -206,7 +206,7 @@ export default async function Home() {
   const about = aboutRes?.data?.content ?? fallbackAbout;
   const skills = skillsRes?.data?.content ?? { categories: fallbackSkills };
   const projects = projectsRes?.data?.content ?? { projects: fallbackProjects };
-  console.log('[DEBUG] projects.length =', projects?.projects?.length, 'slugs =', projects?.projects?.map(p => p.slug).join(','));
+  console.log('[DEBUG] projects.length =', projects?.projects?.length, 'slugs =', projects?.projects?.map((p: any) => p.slug).join(','));
   // Show ALL projects on home (was previously featured-only = 2)
   const allProjects = projects.projects as Project[];
   const skillCategories = skills.categories ?? fallbackSkills;

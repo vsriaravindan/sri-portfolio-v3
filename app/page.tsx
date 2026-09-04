@@ -29,7 +29,7 @@ const fallbackAbout = {
   heading: { line1: "Cloud Automation", line2: "AI-Augmented" },
 };
 
-// ── 6-project fallback (covers all projects shown across home + /projects) ──
+// ── 7-project fallback (covers all projects shown across home + /projects) ──
 const fallbackProjects: Project[] = [
   {
     slug: "devops-academy",
@@ -165,6 +165,29 @@ const fallbackProjects: Project[] = [
       "Autonomous AI agent",
       "Express + Prisma backend",
       "Polygon Amoy deployment",
+    ],
+  },
+  {
+    slug: "sri-portfolio",
+    name: "sriaravindan.com — This Portfolio Site",
+    role: "Full-Stack Developer (self)",
+    description:
+      "Self-documenting portfolio — Next.js 16 + Supabase with /devops CI/CD dashboard, OTP auth, /dashboard CMS, and Reddit-style threaded comments over Realtime.",
+    details:
+      "Built as a self-documenting showcase. Live /devops, OTP-only auth (no passwords), custom CMS, Reddit-style threaded comments via Supabase Realtime.",
+    techStack: ["Next.js 16", "React 19", "Supabase", "Supabase Realtime", "framer-motion", "Tiptap", "Tailwind v4", "Docker"],
+    repo: "https://github.com/vsriaravindan/sri-portfolio-v3",
+    liveUrl: "https://sriaravindan.com/",
+    featured: false,
+    standout:
+      "Self-documenting — /devops shows live CI/CD, /blog has Reddit-style threaded comments, and /projects lists itself.",
+    category: "Web",
+    highlights: [
+      "Live /devops CI/CD dashboard",
+      "Reddit-style threaded comments (Realtime)",
+      "OTP auth (no passwords)",
+      "Custom CMS at /dashboard",
+      "Custom design system, framer-motion animations",
     ],
   },
 ];

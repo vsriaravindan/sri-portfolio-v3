@@ -224,4 +224,47 @@ export const projects: Project[] = [
       "Modular architecture — each contract independently upgradeable",
     ],
   },
+
+  // ── Self-reference ────────────────────────────────────────────────────
+  {
+    slug: "sri-portfolio",
+    name: "sriaravindan.com — This Portfolio Site",
+    role: "Full-Stack Developer (self)",
+    description:
+      "The portfolio site you're reading — Next.js 16 + Supabase with a live /devops CI/CD dashboard, OTP auth, dashboard CMS, and blog with Reddit-style threaded comments that update live over Realtime.",
+    details:
+      "Built as a self-documenting showcase. /devops pulls GitHub Actions workflow runs, deployment history, and container health in real time. /blog has Reddit-style threaded comments (parent_id FK + likes_count + comment_likes with UNIQUE constraint) updating over Supabase Realtime (Phoenix Channels) — no polling. Auth is OTP-only via /api/auth/send-otp + /api/auth/verify-otp (no passwords, no magic links). /dashboard is a custom CMS: Tiptap blog editor, site_content JSON management, profile editor. Custom design system — Tailwind v4 with CSS custom properties (type scale, mono-label, display-head, card-line with neon-glow hover). 21 pages, 3 API routes, 9 DB tables. Self-hosted Docker + Nginx + Let's Encrypt on Oracle Cloud VPS.",
+    techStack: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind v4",
+      "Supabase",
+      "Postgres",
+      "RLS",
+      "Supabase Realtime",
+      "framer-motion",
+      "Tiptap",
+      "lucide-react",
+      "Docker",
+      "Nginx",
+      "Let's Encrypt",
+    ],
+    repo: "https://github.com/vsriaravindan/sri-portfolio-v3",
+    liveUrl: "https://sriaravindan.com/",
+    featured: false,
+    standout:
+      "Self-documenting — /devops shows the live CI/CD pipeline, /blog has Reddit-style threaded comments over Supabase Realtime, and /projects lists itself as one of the projects.",
+    category: "Web",
+    highlights: [
+      "Live /devops dashboard: GitHub Actions + deployments + container health",
+      "Reddit-style threaded comments (parent_id + likes + Realtime)",
+      "OTP auth (send-otp + verify-otp) — no passwords, no magic links",
+      "Custom CMS at /dashboard: blog editor + content + profile",
+      "Custom design system: tokens, neon-glow card-line, mono-label, display-head",
+      "21 pages, 3 API routes, 9 DB tables",
+      "framer-motion animations + Cmd+K command palette",
+      "Self-hosted Docker + Nginx + Let's Encrypt on Oracle Cloud VPS",
+    ],
+  },
 ];

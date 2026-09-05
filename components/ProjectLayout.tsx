@@ -50,7 +50,7 @@ export default function ProjectLayout({
             <Globe size={16} /> Visit Live
           </a>
         )}
-        {project.infoUrl && (
+        {project.infoUrl && project.infoUrl !== project.liveUrl && (
           <a
             href={project.infoUrl}
             target="_blank"

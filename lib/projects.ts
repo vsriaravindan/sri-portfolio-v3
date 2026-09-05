@@ -86,7 +86,7 @@ export const projects: Project[] = [
     apkUrl: "https://github.com/vsriaravindan/ledgercalc/releases/download/v6.8/ledgercalc.apk",
     apkVersion: "v6.8",
     infoUrl: "https://vsriaravindan.github.io/ledgercalc/",
-    liveUrl: "https://github.com/vsriaravindan/ledgercalc/releases/download/v6.8/ledgercalc.apk",
+    liveUrl: "https://vsriaravindan.github.io/ledgercalc/",
     liveLabel: "Live in production · v6.8",
     featured: true,
     standout:
@@ -164,7 +164,7 @@ export const projects: Project[] = [
     apkUrl: "https://github.com/vsriaravindan/SriBoard/releases/download/v2.3/Sriboard-v2.3-release.apk",
     apkVersion: "v2.3",
     infoUrl: "https://vsriaravindan.github.io/SriBoard/",
-    liveUrl: "https://github.com/vsriaravindan/SriBoard/releases/download/v2.3/Sriboard-v2.3-release.apk",
+    liveUrl: "https://vsriaravindan.github.io/SriBoard/",
     liveLabel: "Live in production · v2.3",
     featured: false,
     standout:
@@ -194,7 +194,7 @@ export const projects: Project[] = [
     apkUrl: "https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk",
     apkVersion: "v1.0",
     infoUrl: "https://vsriaravindan.github.io/netswitch/",
-    liveUrl: "https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk",
+    liveUrl: "https://vsriaravindan.github.io/netswitch/",
     liveLabel: "Live in production · v1.0",
     featured: false,
     standout:

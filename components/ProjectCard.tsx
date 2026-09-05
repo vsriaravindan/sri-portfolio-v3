@@ -28,7 +28,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       {project.liveUrl && (
         <span className="pill mb-3 w-max text-[0.6rem]">
           <span className="avail-dot" />
-          Live in production
+          {project.liveLabel ?? 'Live in production'}
         </span>
       )}
 

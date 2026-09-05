@@ -7,6 +7,7 @@ export type Project = {
   techStack: string[];
   repo: string;
   liveUrl?: string;
+  liveLabel?: string; // Override "Live in production" pill text (e.g. include APK version)
   apkUrl?: string; // GitHub Releases asset URL (Android apps only)
   apkVersion?: string; // Human-readable version label, e.g. "v6.8"
   featured: boolean;
@@ -83,6 +84,8 @@ export const projects: Project[] = [
     repo: "https://github.com/vsriaravindan/ledgercalc",
     apkUrl: "https://github.com/vsriaravindan/ledgercalc/releases/download/v6.8/ledgercalc.apk",
     apkVersion: "v6.8",
+    liveUrl: "https://github.com/vsriaravindan/ledgercalc/releases/download/v6.8/ledgercalc.apk",
+    liveLabel: "Live in production · v6.8",
     featured: true,
     standout:
       "Real-time WebSocket sync + 6-digit secret-code sharing + history auto-save without pressing = + 33 financial calculators in one APK.",
@@ -158,6 +161,8 @@ export const projects: Project[] = [
     repo: "https://github.com/vsriaravindan/SriBoard",
     apkUrl: "https://github.com/vsriaravindan/SriBoard/releases/download/v2.3/Sriboard-v2.3-release.apk",
     apkVersion: "v2.3",
+    liveUrl: "https://github.com/vsriaravindan/SriBoard/releases/download/v2.3/Sriboard-v2.3-release.apk",
+    liveLabel: "Live in production · v2.3",
     featured: false,
     standout:
       "Inline AI inside the keyboard (no Accessibility Service), BYOK for 5 providers, manifest declares no INTERNET permission by default.",
@@ -185,6 +190,8 @@ export const projects: Project[] = [
     repo: "https://github.com/vsriaravindan/netswitch",
     apkUrl: "https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk",
     apkVersion: "v1.0",
+    liveUrl: "https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk",
+    liveLabel: "Live in production · v1.0",
     featured: false,
     standout:
       "Zero-permission deep-link to SIM network settings — works on ColorOS where pm grant and appops set are blocked.",

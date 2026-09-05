@@ -43,13 +43,15 @@ export default async function OGImage() {
               display: 'flex',
             }}
           />
-          Sri Aravindan
+          <div style={{ display: 'flex' }}>Sri Aravindan</div>
         </div>
 
         {/* Main headline */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div
             style={{
+              display: 'flex',
+              flexDirection: 'column',
               fontSize: '88px',
               fontWeight: 700,
               lineHeight: 0.95,
@@ -57,20 +59,21 @@ export default async function OGImage() {
               letterSpacing: '-0.02em',
             }}
           >
-            Cloud Automation.
-            <br />
-            <span style={{ color: '#00ff41' }}>AI-Augmented.</span>
+            <div style={{ display: 'flex' }}>Cloud Automation.</div>
+            <div style={{ display: 'flex' }}>
+              <span style={{ color: '#00ff41' }}>AI-Augmented.</span>
+            </div>
           </div>
           <div
             style={{
+              display: 'flex',
               fontSize: '28px',
               color: '#d0d0d0',
               maxWidth: '900px',
               lineHeight: 1.4,
             }}
           >
-            I build resilient cloud infrastructures, automate complex
-            workflows, and deploy production-grade applications.
+            I build resilient cloud infrastructures, automate complex workflows, and deploy production-grade applications.
           </div>
         </div>
 
@@ -87,8 +90,8 @@ export default async function OGImage() {
             textTransform: 'uppercase',
           }}
         >
-          <div>sriaravindan.com</div>
-          <div>Chennai · UTC+5:30</div>
+          <div style={{ display: 'flex' }}>sriaravindan.com</div>
+          <div style={{ display: 'flex' }}>Chennai · UTC+5:30</div>
         </div>
       </div>
     ),

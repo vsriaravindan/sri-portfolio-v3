@@ -1,11 +1,8 @@
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CodeXml, Check, Download } from 'lucide-react';
+import ProjectLayout from '@/components/ProjectLayout';
 import type { Project } from '@/lib/projects';
 
-// Revalidate every 60s — Supabase content (apkUrl, description) can change
-// without a redeploy, and the previous default cached the page for 1 year.
 export const revalidate = 60;
 
 export default async function LedgerCalcPage() {
@@ -22,101 +19,24 @@ export default async function LedgerCalcPage() {
   if (!project) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-6 pb-24 pt-28 sm:px-10 sm:pt-36">
-      <Link
-        href="/"
-        className="mono-label inline-flex items-center gap-2 hover:text-[var(--accent)]"
-      >
-        <ArrowLeft size={14} />
-        Back
-      </Link>
-
-      <div className="mt-8">
-        <p className="mono-label">{project.role}</p>
-        <h1 className="display-head mt-3 text-[length:var(--type-display-md)] leading-[var(--leading-display-md)]">
-          {project.name}
-        </h1>
-      </div>
-
-      <div className="mt-10 grid gap-6 sm:grid-cols-2">
-        {project.repo && (
-          <a
-            href={project.repo}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-ghost"
-          >
-            <CodeXml size={16} />
-            View Repository
-          </a>
-        )}
-        {project.apkUrl && (
-          <a
-            href={project.apkUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-solid"
-          >
-            <Download size={16} />
-            Download APK {project.apkVersion ?? ''}
-          </a>
-        )}
-      </div>
-
-      {project.apkUrl && (
-        <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--text-muted)]">
-          Sideload only — not on Play Store. Enable "Install unknown apps" for your browser first.
-        </p>
-      )}
-
-      <div className="mt-12">
+    <ProjectLayout project={project}>
+      <section className="mt-10">
         <h2 className="font-mono text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
-          Overview
+          Architecture
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
-          {project.details}
+          Built natively in Kotlin + Jetpack Compose with a
+          glass-morphism Material3 design language. Local persistence
+          is Room v3 with three migrations; remote sync uses Supabase
+          Postgres + Phoenix Channels WebSockets (not polling) for
+          instant INSERT/UPDATE/DELETE propagation to all members.
+          Includes a full audit trail (📝 edited / 🗑️ deleted actor chips),
+          auto-reconnect with exponential backoff, and offline guards
+          for shared folders. CalcHub delivers 33 financial calculators
+          in the same APK (SIP, EMI, FD, PPF, EPF, RD, NPS, SWP, GST,
+          HRA, XIRR, …).
         </p>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="font-mono text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
-          Key Highlights
-        </h2>
-        <ul className="mt-4 space-y-3">
-          {project.highlights.map((h: string, i: number) => (
-            <li key={i} className="flex items-start gap-3 text-sm">
-              <Check size={16} className="mt-0.5 shrink-0 text-[var(--accent)]" />
-              <span className="text-[var(--text-secondary)]">{h}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="font-mono text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
-          Tech Stack
-        </h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {project.techStack.map((tech: string) => (
-            <span key={tech} className="pill text-[0.6rem]">
-              {tech}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative mt-16 overflow-hidden rounded-sm border border-[var(--border-subtle)]">
-        <div className="project-cover__dots absolute inset-0" />
-        <div className="project-cover__glow absolute inset-0" />
-        <div className="relative flex min-h-[200px] items-center justify-center p-10 sm:min-h-[280px]">
-          <div className="text-center">
-            <h3 className="display-head text-[length:var(--type-display-sm)]">
-              {project.name.split("—")[0].trim()}
-            </h3>
-            <span className="project-cover__cursor" />
-          </div>
-        </div>
-      </div>
-    </div>
+      </section>
+    </ProjectLayout>
   );
 }

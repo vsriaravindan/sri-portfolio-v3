@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, ExternalLink, FileText, Settings, KeyRound, Star } from 'lucide-react';
+import { toast } from '@/components/Toast';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -61,8 +62,9 @@ export default function DashboardPage() {
         throw new Error(err.message || `Delete failed: ${res.status}`);
       }
       setPosts((p) => p.filter((x: any) => x.id !== id));
+      toast('Post deleted', 'success');
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     }
   };
 
@@ -83,8 +85,9 @@ export default function DashboardPage() {
         throw new Error(err.message || `Update failed: ${res.status}`);
       }
       setPosts((p) => p.map((x: any) => (x.id === id ? { ...x, featured: !current } : x)));
+      toast(current ? 'Removed from homepage' : 'Featured on homepage', 'success');
     } catch (err: any) {
-      alert(err.message);
+      toast(err.message, 'error');
     }
   };
 

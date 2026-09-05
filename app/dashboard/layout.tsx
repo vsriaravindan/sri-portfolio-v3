@@ -6,6 +6,7 @@ import { api } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import { ArrowLeft, LogOut, Loader2 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
+import ToastHost from '@/components/Toast';
 
 export default function DashboardLayout({
   children,
@@ -213,6 +214,7 @@ export default function DashboardLayout({
         </div>
       </header>
       <div className="mx-auto max-w-5xl px-6 py-8">{children}</div>
+      <ToastHost />
     </div>
   );
 }

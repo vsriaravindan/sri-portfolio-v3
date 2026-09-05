@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CodeXml, Check } from 'lucide-react';
+import { ArrowLeft, CodeXml, Check, Download } from 'lucide-react';
 import type { Project } from '@/lib/projects';
 
 export default async function LedgerCalcPage() {
@@ -46,7 +46,24 @@ export default async function LedgerCalcPage() {
             View Repository
           </a>
         )}
+        {project.apkUrl && (
+          <a
+            href={project.apkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-solid"
+          >
+            <Download size={16} />
+            Download APK {project.apkVersion ?? ''}
+          </a>
+        )}
       </div>
+
+      {project.apkUrl && (
+        <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--text-muted)]">
+          Sideload only — not on Play Store. Enable "Install unknown apps" for your browser first.
+        </p>
+      )}
 
       <div className="mt-12">
         <h2 className="font-mono text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">

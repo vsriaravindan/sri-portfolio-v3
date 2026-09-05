@@ -1,5 +1,14 @@
 import Link from 'next/link';
-import { ArrowLeft, CodeXml, Check } from 'lucide-react';
+import { ArrowLeft, CodeXml, Check, Download } from 'lucide-react';
+
+// Inline Android app metadata — only fields the subpage uses.
+const project = {
+  name: 'NetSwitch — Zero-Permission Network Mode Toggle',
+  role: 'Android Developer (Side Project)',
+  repo: 'https://github.com/vsriaravindan/netswitch',
+  apkUrl: 'https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk',
+  apkVersion: 'v1.0',
+};
 
 export default function NetSwitchPage() {
   return (
@@ -12,22 +21,38 @@ export default function NetSwitchPage() {
       </Link>
 
       <div className="mt-8">
-        <p className="mono-label">Android Developer (Side Project)</p>
+        <p className="mono-label">{project.role}</p>
         <h1 className="display-head mt-3 text-[length:var(--type-display-md)] leading-[var(--leading-display-md)]">
-          NetSwitch — Zero-Permission Network Mode Toggle
+          {project.name}
         </h1>
       </div>
 
       <div className="mt-10 flex flex-wrap gap-4">
         <a
-          href="https://github.com/vsriaravindan/netswitch"
+          href={project.repo}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-ghost"
         >
           <CodeXml size={16} /> View Repository
         </a>
+        {project.apkUrl && (
+          <a
+            href={project.apkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-solid"
+          >
+            <Download size={16} /> Download APK {project.apkVersion}
+          </a>
+        )}
       </div>
+
+      {project.apkUrl && (
+        <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--text-muted)]">
+          Sideload only — not on Play Store. Requires Shizuku. Enable "Install unknown apps" for your browser first.
+        </p>
+      )}
 
       <section className="mt-12">
         <h2 className="font-mono text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">

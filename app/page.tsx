@@ -211,13 +211,23 @@ const fallbackProjects: Project[] = [
   },
 ];
 
+// Revalidate every 60s — Supabase content (post featured flags, project
+// descriptions) can change without a redeploy, and Next.js 16's default
+// caches the Supabase fetch for 1 year otherwise.
+export const revalidate = 60;
+
 export default async function Home() {
   const [aboutRes, skillsRes, projectsRes, latestPostsRes] = await Promise.all([
     supabase.from('site_content').select('content').eq('section', 'about').maybeSingle(),
     supabase.from('site_content').select('content').eq('section', 'skills').maybeSingle(),
     supabase.from('site_content').select('content').eq('section', 'projects').maybeSingle(),
-    supabase.from('posts').select('id, title, slug, excerpt, tags, read_time, created_at, cover_url')
+    // Manually featured posts only — admin promotes via dashboard.
+    // Replaces the previous 'latest 3 by created_at' which had a staleness
+    // bug because the homepage was cached at build time.
+    supabase.from('posts')
+      .select('id, title, slug, excerpt, tags, read_time, created_at, cover_url')
       .eq('published', true)
+      .eq('featured', true)
       .order('created_at', { ascending: false })
       .limit(3),
   ]);

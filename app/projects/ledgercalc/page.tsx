@@ -4,6 +4,10 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, CodeXml, Check, Download } from 'lucide-react';
 import type { Project } from '@/lib/projects';
 
+// Revalidate every 60s — Supabase content (apkUrl, description) can change
+// without a redeploy, and the previous default cached the page for 1 year.
+export const revalidate = 60;
+
 export default async function LedgerCalcPage() {
   const { data } = await supabase
     .from('site_content')

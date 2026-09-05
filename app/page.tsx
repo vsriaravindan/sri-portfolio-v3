@@ -322,6 +322,17 @@ export default async function Home() {
               ))}
             </div>
           )}
+
+          {/* Bottom CTA — same View all as the top, so users who scroll
+              past the cards don't have to scroll back up to navigate */}
+          <div className="mt-10 flex justify-center">
+            <Link
+              href="/projects"
+              className="btn btn-solid text-[0.7rem]"
+            >
+              View all {allProjects.length} &rarr;
+            </Link>
+          </div>
         </section>
       </ScrollReveal>
 

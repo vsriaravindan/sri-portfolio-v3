@@ -29,7 +29,7 @@ export default function BankChainPage() {
           href={liveUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn-primary"
+          className="btn btn-ghost"
         >
           <ExternalLink size={16} /> Live Demo
         </a>

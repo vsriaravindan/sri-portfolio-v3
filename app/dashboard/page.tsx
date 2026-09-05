@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/supabase-browser';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, ExternalLink, FileText, Settings, KeyRound } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, FileText, Settings, KeyRound, Star } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function DashboardPage() {
           ? '' // no filter — all posts
           : `&author_id=eq.${u.id}`;
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?select=id,title,slug,published,read_time,created_at,author_id${filter}&order=created_at.desc`,
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?select=id,title,slug,published,featured,read_time,created_at,author_id${filter}&order=created_at.desc`,
           { headers: api._headers() }
         );
         const data = await res.json();
@@ -40,11 +40,10 @@ export default function DashboardPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this post?')) return;
     const token = localStorage.getItem('sb-at');
-    const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?id=eq.${id}`, {
         method: 'DELETE',
-        headers: { apikey: ANON_KEY!, Authorization: `Bearer ${token}` },
+        headers: api._headers(),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -56,7 +55,29 @@ export default function DashboardPage() {
     }
   };
 
-  const handlePasswordChange = async () => {
+  const handleToggleFeatured = async (id: string, current: boolean) => {
+    if (!isAdmin) return; // only admin can feature
+    const token = localStorage.getItem('sb-at');
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          ...api._headers(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ featured: !current }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Update failed: ${res.status}`);
+      }
+      setPosts((p) => p.map((x: any) => (x.id === id ? { ...x, featured: !current } : x)));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handlePasswordChange = () => {
     if (!userEmail) return;
     sessionStorage.setItem('otp-email', userEmail);
     sessionStorage.setItem('otp-type', 'password_change');
@@ -163,11 +184,28 @@ export default function DashboardPage() {
                   </Link>
                   <div className="mt-1 flex items-center gap-3 text-[0.6rem] text-[var(--text-muted)]">
                     <span>{post.published ? 'Published' : 'Draft'}</span>
+                    {post.featured && (
+                      <span style={{ color: 'var(--accent)' }}>★ Featured on home</span>
+                    )}
                     <span>{new Date(post.created_at).toLocaleDateString()}</span>
                     {post.read_time && <span>{post.read_time} min</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleToggleFeatured(post.id, !!post.featured)}
+                      className="nav-icon-btn"
+                      aria-label={post.featured ? 'Unfeature from home' : 'Feature on home'}
+                      title={post.featured ? 'Unfeature from home' : 'Feature on home'}
+                      style={post.featured ? { color: 'var(--accent)' } : undefined}
+                    >
+                      <Star
+                        size={12}
+                        fill={post.featured ? 'currentColor' : 'none'}
+                      />
+                    </button>
+                  )}
                   <Link
                     href={`/blog/${post.slug}/edit`}
                     className="nav-icon-btn"

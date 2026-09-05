@@ -26,12 +26,23 @@ export default function DashboardPage() {
         const filter = u.email === 'vsriaravindan@gmail.com'
           ? '' // no filter — all posts
           : `&author_id=eq.${u.id}`;
-        const res = await fetch(
+        // Note: 'featured' column only exists after seed-posts-featured-v1.sql
+        // is run. Try to fetch it; if the column doesn't exist, fall back
+        // gracefully so the dashboard still renders.
+        let res = await fetch(
           `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?select=id,title,slug,published,featured,read_time,created_at,author_id${filter}&order=created_at.desc`,
           { headers: api._headers() }
         );
+        if (res.status === 400) {
+          // Fallback: featured column missing — fetch without it.
+          res = await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/posts?select=id,title,slug,published,read_time,created_at,author_id${filter}&order=created_at.desc`,
+            { headers: api._headers() }
+          );
+        }
         const data = await res.json();
-        setPosts(data ?? []);
+        // Coerce to array — Supabase error responses are objects, not arrays.
+        setPosts(Array.isArray(data) ? data : []);
       }
       setLoading(false);
     });

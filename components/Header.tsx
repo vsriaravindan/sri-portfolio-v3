@@ -82,13 +82,14 @@ export default function Header() {
           <div className="ml-3 flex items-center gap-2">
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('toggle-cmd-palette'))}
-              className="nav-icon-btn relative group"
-              aria-label="Search (Ctrl+K)"
+              className="cmd-bar group"
+              aria-label="Open command palette (Ctrl+K)"
             >
-              <Search size={13} />
-              <span className="pointer-events-none absolute -bottom-[18px] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[0.5rem] tracking-[0.05em] text-[var(--text-muted)] opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                {typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl+K'}
-              </span>
+              <Search size={12} />
+              <span className="hidden text-[0.7rem] sm:inline">Search</span>
+              <kbd className="cmd-kbd">
+                {typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl K'}
+              </kbd>
             </button>
             <button
               onClick={toggle}
@@ -138,12 +139,13 @@ export default function Header() {
                   window.dispatchEvent(new CustomEvent('toggle-cmd-palette'));
                   setMobileOpen(false);
                 }}
-                className="flex items-center gap-1.5 nav-icon-btn px-1.5"
-                aria-label="Open search (Ctrl+K)"
+                className="cmd-bar w-full"
+                aria-label="Open command palette (Ctrl+K)"
               >
-                <Search size={13} />
-                <kbd className="font-mono text-[0.5rem] tracking-[0.05em] text-[var(--text-muted)] leading-none">
-                  ⌘K
+                <Search size={12} />
+                <span className="text-[0.7rem]">Search</span>
+                <kbd className="cmd-kbd ml-auto">
+                  {typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl K'}
                 </kbd>
               </button>
               <button

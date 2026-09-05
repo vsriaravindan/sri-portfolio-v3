@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import type { Project } from '@/lib/projects';
 import { projects } from '@/lib/projects';
+import ProjectCard from '@/components/ProjectCard';
 
 // ── Server-side read from Supabase, fall back to lib/projects.ts ──────────
 async function getProjects() {
@@ -75,62 +76,7 @@ function LeadCard({ project }: { project: Project }) {
   );
 }
 
-// ── Standard card ─────────────────────────────────────────────────────────
-function ProjectCard({ project }: { project: Project }) {
-  return (
-    <Link
-      href={`/projects/${project.slug}`}
-      className="card-line card-line-interactive group relative flex flex-col p-6 sm:p-8"
-    >
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <p className="mono-label text-[0.65rem]">{project.role}</p>
-          <h3 className="display-head mt-2 text-[length:var(--type-display-sm)] leading-[var(--leading-display-sm)]">
-            {project.name}
-          </h3>
-        </div>
-        <ArrowUpRight
-          size={18}
-          className="arrow-nudge mt-1 shrink-0 text-[var(--text-muted)] transition-colors group-hover:text-[var(--accent)]"
-        />
-      </div>
-
-      <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
-        {project.description}
-      </p>
-
-      <p className="mb-4 text-xs italic leading-relaxed text-[var(--text-muted)]">
-        <span className="font-mono not-italic text-[0.6rem] uppercase tracking-[0.12em] text-[var(--accent)]">
-          Standout —
-        </span>{' '}
-        {project.standout}
-      </p>
-
-      {project.liveUrl && (
-        <span className="pill mb-3 w-max text-[0.6rem]">
-          <span className="avail-dot" />
-          {project.liveLabel ?? 'Live in production'}
-        </span>
-      )}
-
-      <div className="mt-auto flex flex-wrap gap-1.5">
-        {project.techStack.slice(0, 5).map((tech) => (
-          <span
-            key={tech}
-            className="font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--text-muted)]"
-          >
-            {tech}
-          </span>
-        ))}
-        {project.techStack.length > 5 && (
-          <span className="font-mono text-[0.65rem] text-[var(--text-muted)]">
-            +{project.techStack.length - 5}
-          </span>
-        )}
-      </div>
-    </Link>
-  );
-}
+// ── Standard card moved to components/ProjectCard.tsx (single source of truth) ──
 
 export default async function ProjectsPage() {
   const allProjects = await getProjects();
@@ -179,7 +125,7 @@ export default async function ProjectsPage() {
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               {items.map((p) => (
-                <ProjectCard key={p.slug} project={p} />
+                <ProjectCard key={p.slug} project={p} showStandout />
               ))}
             </div>
           </section>

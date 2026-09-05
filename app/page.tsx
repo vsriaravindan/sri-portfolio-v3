@@ -1,5 +1,6 @@
 import HeroSection from '@/components/HeroSection';
 import ProjectCard from '@/components/ProjectCard';
+import FeaturedProjectCard from '@/components/FeaturedProjectCard';
 import Band from '@/components/Band';
 import ScrollReveal from '@/components/ScrollReveal';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
@@ -224,9 +225,13 @@ export default async function Home() {
   const about = aboutRes?.data?.content ?? fallbackAbout;
   const skills = skillsRes?.data?.content ?? { categories: fallbackSkills };
   const projects = projectsRes?.data?.content ?? { projects: fallbackProjects };
-  console.log('[DEBUG] projects.length =', projects?.projects?.length, 'slugs =', projects?.projects?.map((p: any) => p.slug).join(','));
-  // Show ALL projects on home (was previously featured-only = 2)
+  // Pick the flagship (first featured) for the lead card, then 3 secondary cards
   const allProjects = projects.projects as Project[];
+  // Pick the flagship (first featured) for the lead card, then 3 secondary cards
+  const featured = allProjects.find((p: Project) => p.featured) ?? allProjects[0];
+  const secondary = allProjects
+    .filter((p: Project) => p.slug !== featured.slug)
+    .slice(0, 3);
   const skillCategories = skills.categories ?? fallbackSkills;
   const latestPosts = latestPostsRes?.data ?? [];
 
@@ -273,29 +278,41 @@ export default async function Home() {
         </section>
       </ScrollReveal>
 
-      {/* Projects — all of them, in a compact rail */}
+      {/* Projects — featured lead + 3 secondary, full list at /projects */}
       <ScrollReveal delay={200}>
         <section className="mx-auto max-w-6xl px-6 pb-24 sm:px-10 sm:pb-28">
           <div className="flex items-baseline justify-between">
             <p className="mono-label" style={{ color: 'var(--accent)' }}>
-              {allProjects.length} Projects Shipped
+              Featured Work
             </p>
             <Link
               href="/projects"
               className="font-mono text-xs hover:underline"
               style={{ color: 'var(--accent)' }}
             >
-              View all &rarr;
+              View all {allProjects.length} &rarr;
             </Link>
           </div>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {allProjects.map((project: Project, idx: number) => (
-              <ScrollReveal key={project.slug} delay={idx * 60}>
-                <ProjectCard project={project} />
+          {/* Lead card — flagship project spans full width */}
+          {featured && (
+            <div className="mt-8">
+              <ScrollReveal delay={0}>
+                <FeaturedProjectCard project={featured} />
               </ScrollReveal>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Secondary cards — 3 most recent/best */}
+          {secondary.length > 0 && (
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {secondary.map((project: Project, idx: number) => (
+                <ScrollReveal key={project.slug} delay={idx * 60}>
+                  <ProjectCard project={project} />
+                </ScrollReveal>
+              ))}
+            </div>
+          )}
         </section>
       </ScrollReveal>
 

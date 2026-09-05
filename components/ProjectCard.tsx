@@ -2,11 +2,17 @@ import Link from 'next/link';
 import type { Project } from '@/lib/projects';
 import { ArrowUpRight } from 'lucide-react';
 
-export default function ProjectCard({ project }: { project: Project }) {
+export default function ProjectCard({
+  project,
+  showStandout = false,
+}: {
+  project: Project;
+  showStandout?: boolean;
+}) {
   return (
     <Link
       href={`/projects/${project.slug}`}
-      className="card-line card-line-interactive flex flex-col p-6 sm:p-8"
+      className="card-line card-line-interactive group relative flex flex-col p-6 sm:p-8"
     >
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
@@ -17,13 +23,22 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
         <ArrowUpRight
           size={18}
-          className="arrow-nudge mt-1 shrink-0 text-[var(--text-muted)]"
+          className="arrow-nudge mt-1 shrink-0 text-[var(--text-muted)] transition-colors group-hover:text-[var(--accent)]"
         />
       </div>
 
       <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
         {project.description}
       </p>
+
+      {showStandout && project.standout && (
+        <p className="mb-4 text-xs italic leading-relaxed text-[var(--text-muted)]">
+          <span className="font-mono not-italic text-[0.6rem] uppercase tracking-[0.12em] text-[var(--accent)]">
+            Standout —
+          </span>{' '}
+          {project.standout}
+        </p>
+      )}
 
       {project.liveUrl && (
         <span className="pill mb-3 w-max text-[0.6rem]">

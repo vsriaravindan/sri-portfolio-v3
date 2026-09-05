@@ -331,7 +331,7 @@ export default async function Home() {
         <section className="mx-auto max-w-6xl px-6 pb-24 sm:px-10 sm:pb-28">
           <p className="mono-label" style={{ color: 'var(--accent)' }}>Latest from the Blog</p>
 
-          <div className="mt-8 space-y-1">
+          <div className="mt-8 space-y-2">
             {latestPosts.length === 0 ? (
               <p className="py-8 text-center text-sm text-[var(--text-muted)]">No posts yet. Stay tuned.</p>
             ) : (
@@ -383,7 +383,7 @@ export default async function Home() {
         <section className="mx-auto max-w-6xl px-6 pb-24 sm:px-10 sm:pb-28">
           <p className="mono-label" style={{ color: 'var(--accent)' }}>Skills &amp; Technologies</p>
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
             {skillCategories.map((cat: { category: string; skills: string[] }, idx: number) => (
               <ScrollReveal key={cat.category} delay={idx * 80}>
                 <div

@@ -10,6 +10,7 @@ export type Project = {
   liveLabel?: string; // Override "Live in production" pill text (e.g. include APK version)
   apkUrl?: string; // GitHub Releases asset URL (Android apps only)
   apkVersion?: string; // Human-readable version label, e.g. "v6.8"
+  infoUrl?: string; // Static info site URL (GitHub Pages) — distinct from liveUrl
   featured: boolean;
   highlights: string[];
   standout: string;
@@ -84,6 +85,7 @@ export const projects: Project[] = [
     repo: "https://github.com/vsriaravindan/ledgercalc",
     apkUrl: "https://github.com/vsriaravindan/ledgercalc/releases/download/v6.8/ledgercalc.apk",
     apkVersion: "v6.8",
+    infoUrl: "https://vsriaravindan.github.io/ledgercalc/",
     liveUrl: "https://github.com/vsriaravindan/ledgercalc/releases/download/v6.8/ledgercalc.apk",
     liveLabel: "Live in production · v6.8",
     featured: true,
@@ -161,6 +163,7 @@ export const projects: Project[] = [
     repo: "https://github.com/vsriaravindan/SriBoard",
     apkUrl: "https://github.com/vsriaravindan/SriBoard/releases/download/v2.3/Sriboard-v2.3-release.apk",
     apkVersion: "v2.3",
+    infoUrl: "https://vsriaravindan.github.io/SriBoard/",
     liveUrl: "https://github.com/vsriaravindan/SriBoard/releases/download/v2.3/Sriboard-v2.3-release.apk",
     liveLabel: "Live in production · v2.3",
     featured: false,
@@ -190,6 +193,7 @@ export const projects: Project[] = [
     repo: "https://github.com/vsriaravindan/netswitch",
     apkUrl: "https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk",
     apkVersion: "v1.0",
+    infoUrl: "https://vsriaravindan.github.io/netswitch/",
     liveUrl: "https://github.com/vsriaravindan/netswitch/releases/download/v1.0/netswitch.apk",
     liveLabel: "Live in production · v1.0",
     featured: false,

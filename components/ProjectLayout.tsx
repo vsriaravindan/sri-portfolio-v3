@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, CodeXml, Globe, Download, Check } from 'lucide-react';
+import { ArrowLeft, CodeXml, Globe, Download, Check, Info } from 'lucide-react';
 import type { Project } from '@/lib/projects';
 
 // Unified project subpage layout. Replaces 7 hand-rolled layouts with a
@@ -48,6 +48,16 @@ export default function ProjectLayout({
             className="btn btn-solid"
           >
             <Globe size={16} /> Visit Live
+          </a>
+        )}
+        {project.infoUrl && (
+          <a
+            href={project.infoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-solid"
+          >
+            <Info size={16} /> Info Site
           </a>
         )}
         {project.apkUrl && (

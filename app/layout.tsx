@@ -56,10 +56,16 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body>
+        {/* Skip-link for keyboard / screen-reader users: jumps past the
+            sticky nav + intro overlay directly to main content. Visually
+            hidden until focused. */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <ThemeProvider>
           <Header />
           <PageTransition>
-            <main>{children}</main>
+            <main id="main-content">{children}</main>
           </PageTransition>
           <Footer />
           <CommandPalette />

@@ -1107,3 +1107,29 @@ body {
   background: color-mix(in srgb, var(--bg-base) 70%, transparent);
   line-height: 1;
 }
+
+/* ── Skip-link (a11y) ────────────────────────────────────────────────────── */
+/* Hidden visually until keyboard-focused; lets screen reader / keyboard
+   users skip the nav and intro overlay to reach <main>. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  border-radius: 2px;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  left: 1rem;
+  top: 1rem;
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}

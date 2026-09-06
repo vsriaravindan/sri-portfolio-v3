@@ -26,7 +26,7 @@ export const SOCIAL = {
 };
 
 export const CTA = {
-  primary: { label: "View My Work", href: "/work" },
+  primary: { label: "My Projects", href: "/projects" },
   secondary: { label: "Visit Live Demo", href: "http://140.245.203.57/", external: true },
 };
 
